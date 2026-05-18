@@ -3,7 +3,7 @@ import { useModuleStore } from './moduleStore';
 import { 
   BarChart3, BookOpen, Building2, CreditCard, Gift, LayoutDashboard, ListTodo,
   MessageCircle, Package, Settings, ShieldCheck, ShoppingCart, Truck, 
-  UserCheck, Users, Utensils, WalletCards, Landmark
+  UserCheck, Users, Utensils, WalletCards, Landmark, Briefcase, Shield
 } from 'lucide-react';
 
 export default function Sidebar({ activePage, onPageChange }) {
@@ -22,11 +22,12 @@ export default function Sidebar({ activePage, onPageChange }) {
     {
       label: 'Management',
       items: [
-        { id: 'inventory', label: 'Inventory', icon: Package, enabled: modules.inventory },
-        { id: 'purchasing', label: 'Purchasing', icon: Truck, enabled: true },
+        { id: 'inventory', label: 'Inventory (Basic)', icon: Package, enabled: modules.inventory },
+        { id: 'advanced-inventory', label: 'Inventory (Advanced)', icon: Package, enabled: modules.inventory },
+        { id: 'procurement', label: 'Procurement', icon: Truck, enabled: true },
         { id: 'crm', label: 'CRM', icon: Users, enabled: modules.crm },
         { id: 'loyalty', label: 'Loyalty & Promos', icon: Gift, enabled: modules.loyalty },
-        { id: 'projects', label: 'Projects & Tasks', icon: ListTodo, enabled: true },
+        { id: 'projects', label: 'Projects & Services', icon: Briefcase, enabled: true },
         { id: 'reports', label: 'Reports', icon: BarChart3, enabled: true },
       ]
     },
@@ -41,8 +42,8 @@ export default function Sidebar({ activePage, onPageChange }) {
     {
       label: 'HR & Operations',
       items: [
-        { id: 'staff', label: 'Employees / WPS', icon: UserCheck, enabled: true },
-        { id: 'shifts', label: 'Shifts & Access', icon: ShieldCheck, enabled: true },
+        { id: 'hr-payroll', label: 'HR & Payroll', icon: UserCheck, enabled: true },
+        { id: 'staff', label: 'Staff Shifts', icon: ShieldCheck, enabled: true },
         { id: 'branches', label: 'Multi-Branch', icon: Building2, enabled: true },
       ]
     },
@@ -56,6 +57,7 @@ export default function Sidebar({ activePage, onPageChange }) {
       label: 'System',
       items: [
         { id: 'settings', label: 'Settings', icon: Settings, enabled: true },
+        { id: 'admin-panel', label: 'Admin Panel', icon: Shield, enabled: true },
       ]
     },
   ];

@@ -11,6 +11,13 @@ import Sidebar from './Sidebar';
 import ModuleSettings from './ModuleSettings';
 import InventoryExpiry from './InventoryExpiry';
 import ShiftReport from './Reports';
+import AdvancedInventory from './AdvancedInventory';
+import Accounting from './Accounting';
+import HRPayroll from './HRPayroll';
+import CRM from './CRM';
+import Procurement from './Procurement';
+import Projects from './Projects';
+import AdminPanel from './AdminPanel';
 
 const demoProducts = [
   { id: 1, barcode: '6281000001', name: 'Basmati Rice 5kg', category: 'Grocery', price: 28.5, stock: 142, unit: 'bag', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80' },
@@ -488,7 +495,19 @@ export default function POSPage() {
           </div>
         )}
 
-        {activePage === 'accounting' && <ShiftReport shiftId={1} openingFloat={500} />}
+        {activePage === 'advanced-inventory' && <AdvancedInventory />}
+
+        {activePage === 'accounting' && <Accounting />}
+
+        {activePage === 'hr-payroll' && <HRPayroll />}
+
+        {activePage === 'crm' && <CRM />}
+
+        {activePage === 'procurement' && <Procurement />}
+
+        {activePage === 'projects' && <Projects />}
+
+        {activePage === 'admin-panel' && <AdminPanel />}
 
         {activePage === 'pos' && (
           <div className="flex flex-col gap-4 h-full overflow-hidden">
