@@ -1,0 +1,194 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tenant {
+  id            String    @id @default(uuid())
+  name          String
+  subdomain     String    @unique
+  plan          String    @default("basic") // Basic, Pro, Enterprise
+  status        String    @default("active")
+  createdAt     DateTime  @default(now())
+  companies     Company[]
+  users         User[]
+}
+
+model Company {
+  id            Int           @id @default(autoincrement())
+  tenantId      String
+  name          String
+  nameAr        String?       // Arabic Business Name
+  tradeLicense  String?
+  trn           String?       // UAE Tax Registration Number
+  logo          String?
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
+  branches      Branch[]
+  accounts      Account[]     // Chart of Accounts
+  products      Product[]
+}
+
+model User {
+  id            Int           @id @default(autoincrement())
+  tenantId      String
+  email         String        @unique
+  password      String
+  role          String        @default("staff")
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
+}
+
+model Module {
+  id        String  @id // e.g., "fnb", "loyalty", "inventory"
+  name      String
+  enabled   Boolean @default(true)
+  category  String  // e.g., "Operations", "Finance"
+}
+
+model Product {
+  id        Int      @id @default(autoincrement())
+  companyId Int
+  barcode   String   @unique
+  name      String
+  nameAr    String?  // Arabic name for bilingual receipts
+  category  String
+  expiryDate DateTime? // Critical for UAE health/safety compliance
+  image     String?
+  cost      Float
+  price     Float
+  stock     Int
+  unit      String
+  isFnb     Boolean  @default(false) // F&B module flag
+  modifiers String?  // JSON string for F&B modifiers
+  company   Company  @relation(fields: [companyId], references: [id])
+}
+
+// Double-Entry Accounting
+model Account {
+  id          Int          @id @default(autoincrement())
+  companyId   Int
+  code        String       // e.g., 101001 for Cash
+  name        String
+  type        String       // Asset, Liability, Equity, Revenue, Expense
+  balance     Float        @default(0)
+  company     Company      @relation(fields: [companyId], references: [id])
+  ledgerEntries LedgerEntry[]
+}
+
+model JournalEntry {
+  id          Int           @id @default(autoincrement())
+  date        DateTime      @default(now())
+  description String
+  reference   String?       // Invoice # or PO #
+  entries     LedgerEntry[]
+}
+
+model LedgerEntry {
+  id             Int          @id @default(autoincrement())
+  journalEntryId Int
+  accountId      Int
+  debit          Float        @default(0)
+  credit         Float        @default(0)
+  journal        JournalEntry @relation(fields: [journalEntryId], references: [id])
+  account        Account      @relation(fields: [accountId], references: [id])
+}
+
+model Transaction {
+  id         Int      @id @default(autoincrement())
+  total      Float
+  subtotal   Float
+  vat        Float    // Explicit VAT storage for FTA compliance
+  discount   Float    @default(0)
+  method     String
+  items      String   // JSON stringified items (bilingual)
+  synced     Boolean  @default(false)
+  qrCode     String?  // For ZATCA/FTA E-Invoicing compliance
+  branchId   Int?
+  staffId    Int?
+  shiftId    Int?
+  createdAt  DateTime @default(now())
+  branch     Branch?  @relation(fields: [branchId], references: [id])
+  staff      Staff?   @relation(fields: [staffId], references: [id])
+  shift      Shift?   @relation(fields: [shiftId], references: [id])
+  pettyCash  PettyCash[]
+}
+
+model Branch {
+  id           Int           @id @default(autoincrement())
+  companyId    Int
+  name         String
+  location     String
+  trn          String        // Tax Registration Number
+  transactions Transaction[]
+  company      Company       @relation(fields: [companyId], references: [id])
+}
+
+model Staff {
+  id           Int           @id @default(autoincrement())
+  name         String
+  role         String
+  pin          String        // For POS locking/access
+  emiratesId   String?
+  visaExpiry   DateTime?
+  transactions Transaction[]
+  shifts       Shift[]
+  commissions  Commission[]
+  contracts    Contract[]
+}
+
+model Contract {
+  id           Int      @id @default(autoincrement())
+  staffId      Int
+  basicSalary  Float
+  allowances   Float
+  wpsCode      String?  // For UAE WPS export
+  staff        Staff    @relation(fields: [staffId], references: [id])
+}
+
+model PettyCash {
+  id            Int      @id @default(autoincrement())
+  amount        Float
+  reason        String
+  staffId       Int
+  transactionId Int?     @relation(fields: [transactionId], references: [id])
+  createdAt     DateTime @default(now())
+}
+
+model Shift {
+  id           Int           @id @default(autoincrement())
+  staffId      Int
+  branchId     Int?
+  startTime    DateTime      @default(now())
+  endTime      DateTime?
+  openingFloat Float
+  closingCash  Float?
+  status       String        @default("open") // open, closed
+  staff        Staff         @relation(fields: [staffId], references: [id])
+  transactions Transaction[]
+}
+
+model Table {
+  id             Int     @id @default(autoincrement())
+  number         String  @unique
+  status         String  @default("available") // available, occupied, reserved
+  capacity       Int     @default(4)
+  currentOrderId Int?
+}
+
+model Commission {
+  id        Int      @id @default(autoincrement())
+  staffId   Int
+  amount    Float
+  staff     Staff    @relation(fields: [staffId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Customer {
+  id      Int    @id @default(autoincrement())
+  name    String
+  phone   String @unique
+  loyalty Int    @default(0)
+}
