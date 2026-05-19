@@ -1,8 +1,11 @@
 interface ElectronAPI {
   saveTransaction(data: any): Promise<any>;
+  getTransactions(): Promise<any>;
   getProducts(): Promise<any>;
   getCustomers(): Promise<any>;
   updateLoyalty(payload: any): Promise<any>;
+  updateProduct(product: any): Promise<any>;
+  bulkUpsertProducts(products: any[]): Promise<any>;
   getBranches(): Promise<any>;
   verifyStaff(pin: any): Promise<any>;
   updateStock(id: any, newStock: any): Promise<any>;

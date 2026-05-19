@@ -64,8 +64,9 @@ export default function CRM() {
       {/* Content */}
       {activeTab === 'customers' && (
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="max-h-[60vh] overflow-y-auto">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
               <thead className="bg-slate-100 border-b">
                 <tr>
                   <th className="px-6 py-3 text-left font-semibold">Customer</th>
@@ -105,6 +106,7 @@ export default function CRM() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}

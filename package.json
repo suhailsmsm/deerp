@@ -10,8 +10,8 @@
     "dist": "npm run build && electron-builder"
   },
   "build": {
-    "appId": "com.nexapos.erp",
-    "productName": "NexaPOS ERP",
+    "appId": "com.derp.erp",
+    "productName": "dERP",
     "files": [
       "main.js",
       "preload.js",

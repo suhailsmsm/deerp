@@ -24,6 +24,7 @@ model Company {
   name          String
   nameAr        String?       // Arabic Business Name
   tradeLicense  String?
+  licenseExpiry DateTime?     // Critical for UAE compliance audits
   trn           String?       // UAE Tax Registration Number
   logo          String?
   tenant        Tenant        @relation(fields: [tenantId], references: [id])
@@ -63,6 +64,10 @@ model Product {
   unit      String
   isFnb     Boolean  @default(false) // F&B module flag
   modifiers String?  // JSON string for F&B modifiers
+  minStock  Int      @default(0)
+  maxStock  Int      @default(0)
+  batch     String?
+  warehouse String?
   company   Company  @relation(fields: [companyId], references: [id])
 }
 

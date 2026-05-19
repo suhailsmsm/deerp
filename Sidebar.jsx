@@ -3,7 +3,7 @@ import { useModuleStore } from './moduleStore';
 import { 
   BarChart3, BookOpen, Building2, CreditCard, Gift, LayoutDashboard, ListTodo,
   MessageCircle, Package, Settings, ShieldCheck, ShoppingCart, Truck, 
-  UserCheck, Users, Utensils, WalletCards, Landmark, Briefcase, Shield
+  UserCheck, Users, Utensils, WalletCards, Landmark, Briefcase, BrainCircuit
 } from 'lucide-react';
 
 export default function Sidebar({ activePage, onPageChange }) {
@@ -11,10 +11,17 @@ export default function Sidebar({ activePage, onPageChange }) {
 
   const groups = [
     {
+      label: 'System',
+      items: [
+        { id: 'settings-admin', label: 'Settings & Admin', icon: Settings, enabled: true },
+      ]
+    },
+    {
       label: 'Operations',
       items: [
         { id: 'pos', label: 'Point of Sale', icon: ShoppingCart, enabled: true },
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, enabled: true },
+        { id: 'ai-insights', label: 'AI Features', icon: BrainCircuit, enabled: modules.ai },
         { id: 'payments', label: 'Payments', icon: CreditCard, enabled: true },
         { id: 'communications', label: 'Comms & Delivery', icon: MessageCircle, enabled: modules.whatsapp },
       ]
@@ -22,7 +29,6 @@ export default function Sidebar({ activePage, onPageChange }) {
     {
       label: 'Management',
       items: [
-        { id: 'inventory', label: 'Inventory (Basic)', icon: Package, enabled: modules.inventory },
         { id: 'advanced-inventory', label: 'Inventory (Advanced)', icon: Package, enabled: modules.inventory },
         { id: 'procurement', label: 'Procurement', icon: Truck, enabled: true },
         { id: 'crm', label: 'CRM', icon: Users, enabled: modules.crm },
@@ -53,19 +59,12 @@ export default function Sidebar({ activePage, onPageChange }) {
         { id: 'fnb', label: 'F&B Module', icon: Utensils, enabled: modules.fnb },
       ]
     },
-    {
-      label: 'System',
-      items: [
-        { id: 'settings', label: 'Settings', icon: Settings, enabled: true },
-        { id: 'admin-panel', label: 'Admin Panel', icon: Shield, enabled: true },
-      ]
-    },
   ];
 
   return (
     <aside className="w-64 bg-slate-900 text-white h-screen flex flex-col">
       <div className="p-6">
-        <h1 className="text-xl font-bold text-blue-400">NexaPOS</h1>
+        <h1 className="text-xl font-bold text-blue-400">dERP</h1>
         <p className="text-xs text-slate-500 uppercase tracking-widest mt-1">Enterprise Suite</p>
       </div>
       

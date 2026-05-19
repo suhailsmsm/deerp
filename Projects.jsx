@@ -69,7 +69,7 @@ export default function Projects() {
 
       {/* Content */}
       {activeTab === 'projects' && (
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
           {projects.map(project => (
             <div key={project.id} className="bg-white rounded-2xl border border-slate-200 p-6">
               <div className="flex items-start justify-between mb-4">
@@ -118,7 +118,8 @@ export default function Projects() {
 
       {activeTab === 'tasks' && (
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="max-h-[50vh] overflow-y-auto">
+            <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-100 border-b">
                 <tr>
@@ -153,6 +154,7 @@ export default function Projects() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}

@@ -75,8 +75,9 @@ export default function Procurement() {
       {/* Content */}
       {activeTab === 'purchase-orders' && (
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="max-h-[60vh] overflow-y-auto">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
               <thead className="bg-slate-100 border-b">
                 <tr>
                   <th className="px-6 py-3 text-left font-semibold">PO Number</th>
@@ -114,6 +115,7 @@ export default function Procurement() {
             </table>
           </div>
         </div>
+      </div>
       )}
 
       {activeTab === 'rfq' && (

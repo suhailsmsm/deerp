@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { PrismaClient } = require('@prisma/client');
+const fs = require('fs');
 
 const prisma = new PrismaClient();
 
@@ -8,7 +9,7 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1280,
     height: 800,
-    title: "NexaPOS ERP",
+    title: "dERP",
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -24,25 +25,51 @@ function createWindow() {
 // Database Handlers
 ipcMain.handle('save-transaction', async (event, data) => {
   const { items, ...txnData } = data;
+  const isReturn = txnData.type === 'return';
+  const signedTotal = isReturn ? -Math.abs(Number(txnData.total || 0)) : Number(txnData.total || 0);
+  const signedSubtotal = isReturn ? -Math.abs(Number(txnData.subtotal || 0)) : Number(txnData.subtotal || 0);
+  const signedVat = isReturn ? -Math.abs(Number(txnData.vat || 0)) : Number(txnData.vat || 0);
+  const signedDiscount = Number(txnData.discount || 0);
 
   return await prisma.$transaction(async (tx) => {
     // 1. Create the transaction record
     const newTransaction = await tx.transaction.create({
       data: {
-        ...txnData,
-        items: JSON.stringify(items),
+        total: signedTotal,
+        subtotal: signedSubtotal,
+        vat: signedVat,
+        discount: signedDiscount,
+        method: txnData.method || 'cash',
+        items: JSON.stringify({
+          type: isReturn ? 'return' : 'sale',
+          customer: txnData.customer || null,
+          currency: txnData.currency || 'AED',
+          coupon: txnData.coupon || null,
+          giftVoucher: txnData.giftVoucher || null,
+          table: txnData.table || null,
+          items,
+        }),
+        branchId: txnData.branchId || null,
+        staffId: txnData.staffId || null,
       }
     });
 
-    // 2. Automatically decrement stock for each sold item
+    // 2. Automatically update stock for each sold/returned item
     for (const item of items) {
       await tx.product.update({
         where: { id: item.id },
-        data: { stock: { decrement: item.qty } }
+        data: { stock: isReturn ? { increment: item.qty } : { decrement: item.qty } }
       });
     }
 
     return newTransaction;
+  });
+});
+
+ipcMain.handle('get-transactions', async () => {
+  return await prisma.transaction.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 500,
   });
 });
 
@@ -81,6 +108,13 @@ ipcMain.handle('get-shift-report', async (event, shiftId) => {
       card: transactions.filter(t => t.method === 'card').reduce((sum, t) => sum + t.total, 0),
     }
   };
+});
+
+// File System Exports (Production Ready)
+ipcMain.handle('export-sif-file', async (event, { content, filename }) => {
+  const exportPath = path.join(app.getPath('downloads'), filename);
+  fs.writeFileSync(exportPath, content);
+  return exportPath;
 });
 
 // Petty Cash & Expenses
@@ -123,9 +157,64 @@ ipcMain.handle('update-customer-loyalty', async (event, { id, points }) => {
   });
 });
 
+const toOptionalNumber = (value) => {
+  if (value === undefined || value === null || value === '') return undefined;
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : undefined;
+};
+
+const toOptionalDate = (value) => {
+  if (!value) return null;
+  const dateValue = new Date(value);
+  return Number.isNaN(dateValue.getTime()) ? undefined : dateValue;
+};
+
+const buildProductUpdateData = (product) => {
+  const data = {};
+
+  if (product.name !== undefined && String(product.name).trim()) data.name = String(product.name).trim();
+  if (product.nameAr !== undefined) data.nameAr = product.nameAr || null;
+  if (product.barcode !== undefined || product.sku !== undefined) data.barcode = product.barcode || product.sku;
+  if (product.category !== undefined) data.category = product.category;
+  if (product.image !== undefined) data.image = product.image || null;
+  if (product.unit !== undefined) data.unit = product.unit;
+  if (product.modifiers !== undefined) data.modifiers = product.modifiers || null;
+  if (product.batch !== undefined) data.batch = product.batch || null;
+  if (product.warehouse !== undefined) data.warehouse = product.warehouse || null;
+
+  const cost = toOptionalNumber(product.cost);
+  if (cost !== undefined) data.cost = cost;
+
+  const price = toOptionalNumber(product.price);
+  if (price !== undefined) data.price = price;
+
+  const stock = toOptionalNumber(product.stock);
+  if (stock !== undefined) data.stock = Math.trunc(stock);
+
+  const minStock = toOptionalNumber(product.minStock);
+  if (minStock !== undefined) data.minStock = Math.trunc(minStock);
+
+  const maxStock = toOptionalNumber(product.maxStock);
+  if (maxStock !== undefined) data.maxStock = Math.trunc(maxStock);
+
+  if (product.isFnb !== undefined) data.isFnb = Boolean(product.isFnb);
+
+  if (product.expiryDate !== undefined || product.expiry !== undefined) {
+    const expiryDate = toOptionalDate(product.expiryDate ?? product.expiry);
+    if (expiryDate !== undefined) data.expiryDate = expiryDate;
+  }
+
+  return data;
+};
+
 ipcMain.handle('update-product', async (event, product) => {
   try {
-    const { id, ...data } = product;
+    const { id } = product;
+    if (!id) {
+      throw new Error('Product ID is required to update a product.');
+    }
+
+    const data = buildProductUpdateData(product);
     return await prisma.product.update({
       where: { id: Number(id) },
       data: data,
@@ -134,6 +223,39 @@ ipcMain.handle('update-product', async (event, product) => {
     console.error("Prisma Update Error:", error);
     throw error; // Re-throw so the frontend catch block triggers
   }
+});
+
+ipcMain.handle('bulk-upsert-products', async (event, products) => {
+  const rows = Array.isArray(products) ? products : [];
+
+  return await prisma.$transaction(rows.map((product) => {
+    const barcode = product.barcode || product.sku;
+    if (!barcode || !product.name) {
+      throw new Error('Each bulk item must include name and sku/barcode.');
+    }
+
+    return prisma.product.upsert({
+      where: { barcode },
+      update: buildProductUpdateData({ ...product, barcode }),
+      create: {
+        companyId: Number(product.companyId || 1),
+        barcode,
+        name: String(product.name).trim(),
+        nameAr: product.nameAr || null,
+        category: product.category || 'Uncategorized',
+        image: product.image || null,
+        cost: Number(product.cost || 0),
+        price: Number(product.price || 0),
+        stock: Math.trunc(Number(product.stock || 0)),
+        unit: product.unit || 'pcs',
+        minStock: Math.trunc(Number(product.minStock || 0)),
+        maxStock: Math.trunc(Number(product.maxStock || 0)),
+        batch: product.batch || null,
+        warehouse: product.warehouse || null,
+        expiryDate: product.expiryDate || product.expiry ? new Date(product.expiryDate || product.expiry) : null,
+      },
+    });
+  }));
 });
 
 // E-Invoicing QR Generation (ZATCA/FTA TLV Style)

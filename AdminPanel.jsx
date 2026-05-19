@@ -104,8 +104,9 @@ export default function AdminPanel() {
           <button className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 flex items-center gap-2">
             <Plus size={18} /> Add Tenant
           </button>
-          {tenants.map(tenant => (
-            <div key={tenant.id} className="bg-white rounded-2xl border border-slate-200 p-6">
+          <div className="max-h-[60vh] overflow-y-auto pr-2">
+            {tenants.map(tenant => (
+              <div key={tenant.id} className="bg-white rounded-2xl border border-slate-200 p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="font-bold text-lg">{tenant.name}</h3>
@@ -133,7 +134,8 @@ export default function AdminPanel() {
                 <button className="text-red-600 hover:underline text-sm font-semibold">Suspend</button>
               </div>
             </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 

@@ -6,6 +6,7 @@ export const useCartStore = create((set) => ({
   selectedCustomer: null,
   discount: 0,
   vatRate: 0.05, // UAE Standard VAT
+  vatInclusive: false,
   addToCart: (product) => set((state) => {
     const existing = state.cart.find((item) => item.id === product.id);
     if (existing) {
@@ -20,6 +21,7 @@ export const useCartStore = create((set) => ({
   removeFromCart: (id) => set((state) => ({
     cart: state.cart.filter((item) => item.id !== id),
   })),
+  setCart: (items) => set({ cart: items }),
   clearCart: () => set({ cart: [] }),
   updateQty: (id, delta) => set((state) => ({
     cart: state.cart.map((item) =>
@@ -29,10 +31,18 @@ export const useCartStore = create((set) => ({
   setLanguage: (lang) => set({ language: lang }),
   setCustomer: (customer) => set({ selectedCustomer: customer }),
   setDiscount: (amt) => set({ discount: amt }),
+  setVatInclusive: (val) => set({ vatInclusive: val }),
   
   // Calculation selectors
   getTotals: (state) => {
-    const subtotal = state.cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+    let subtotal = state.cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+    
+    if (state.vatInclusive) {
+      // If inclusive, back-calculate subtotal: Total / 1.05
+      const total = subtotal;
+      subtotal = total / (1 + state.vatRate);
+    }
+
     const afterDiscount = Math.max(0, subtotal - state.discount);
     const vat = afterDiscount * state.vatRate;
     return {

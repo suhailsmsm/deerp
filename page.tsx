@@ -1,6 +1,6 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { ShoppingCart, CreditCard, Receipt, Search, Plus, Minus, Trash2, Users, Package, MessageSquare, Building2, Edit3 } from 'lucide-react';
+import React, { useEffect, useState, Suspense } from 'react';
+import { ShoppingCart, CreditCard, Receipt, Search, Plus, Minus, Trash2, Users, Package, MessageSquare, Building2, Edit3, RotateCcw, Sun, Moon } from 'lucide-react';
 import { useCartStore } from './cartStore';
 import { useSessionStore } from './sessionStore';
 import { useModuleStore } from './moduleStore';
@@ -8,27 +8,29 @@ import StaffLogin from './StaffLogin';
 import { generateReceiptHtml } from './ReceiptPreview';
 import TableMap from './TableMap';
 import Sidebar from './Sidebar';
-import ModuleSettings from './ModuleSettings';
+import SettingsAdmin from './SettingsAdmin';
 import InventoryExpiry from './InventoryExpiry';
 import ShiftReport from './Reports';
 import AdvancedInventory from './AdvancedInventory';
-import Accounting from './Accounting';
-import HRPayroll from './HRPayroll';
 import CRM from './CRM';
 import Procurement from './Procurement';
-import Projects from './Projects';
-import AdminPanel from './AdminPanel';
 
-const demoProducts = [
-  { id: 1, barcode: '6281000001', name: 'Basmati Rice 5kg', category: 'Grocery', price: 28.5, stock: 142, unit: 'bag', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=400&q=80' },
-  { id: 2, barcode: '6281000002', name: 'Nido Milk 900g', category: 'Dairy', price: 34, stock: 56, unit: 'tin', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=80' },
-  { id: 3, barcode: '6281000003', name: 'Lays Classic 160g', category: 'Snacks', price: 8, stock: 4, unit: 'pcs', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80' },
-  { id: 4, barcode: '6281000004', name: 'Pepsi 1.5L', category: 'Beverages', price: 5, stock: 24, unit: 'bottle', image: 'https://images.unsplash.com/photo-1473093226795-af9932fe5856?auto=format&fit=crop&w=400&q=80' },
-  { id: 5, barcode: '6281000005', name: 'Tide 3kg', category: 'Cleaning', price: 44.5, stock: 23, unit: 'box', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=400&q=80' },
-  { id: 6, barcode: '6281000006', name: 'Sunflower Oil 3L', category: 'Grocery', price: 29, stock: 88, unit: 'bottle', image: 'https://images.unsplash.com/photo-1517685352821-92cf88aee5a5?auto=format&fit=crop&w=400&q=80' },
-  { id: 7, barcode: '6281000007', name: 'iPhone Case 15', category: 'Accessories', price: 24.99, stock: 15, unit: 'pcs', image: 'https://images.unsplash.com/photo-1503602642458-232111445657?auto=format&fit=crop&w=400&q=80' },
-  { id: 8, barcode: '6281000008', name: 'Notebook A4 100pg', category: 'Stationery', price: 6.5, stock: 200, unit: 'pcs', image: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=400&q=80' },
-];
+// Lazy load large module components for better initial bundle size
+const Accounting = React.lazy(() => import('./Accounting'));
+const HRPayroll = React.lazy(() => import('./HRPayroll'));
+const Projects = React.lazy(() => import('./Projects'));
+const AIInsights = React.lazy(() => import('./AIInsights'));
+const SalesReports = React.lazy(() => import('./SalesReports'));
+
+// Loading fallback component
+const ModuleLoadingFallback = () => (
+  <div className="flex items-center justify-center h-96 bg-gray-50 dark:bg-gray-900 rounded-lg">
+    <div className="text-center">
+      <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      <p className="mt-4 text-gray-600 dark:text-gray-400">Loading module...</p>
+    </div>
+  </div>
+);
 
 const demoCustomers = [
   { id: 1, name: 'Mohammed Al Rashid' },
@@ -36,6 +38,14 @@ const demoCustomers = [
   { id: 3, name: 'Khalid Ibrahim' },
   { id: 4, name: 'Sara Mohammed' },
   { id: 5, name: 'Omar Al Hamdan' },
+];
+
+const demoProducts = [
+  { id: 1001, name: 'Demo Coffee Beans 1kg', barcode: 'DEM-1001', category: 'Beverages', price: 45.0, image: null },
+  { id: 1002, name: 'Demo Milk 2L', barcode: 'DEM-1002', category: 'Dairy', price: 12.5, image: null },
+  { id: 1003, name: 'Demo Chocolate Bar', barcode: 'DEM-1003', category: 'Snacks', price: 3.75, image: null },
+  { id: 1004, name: 'Demo Detergent 1L', barcode: 'DEM-1004', category: 'Cleaning', price: 15.0, image: null },
+  { id: 1005, name: 'Demo Bottled Water 500ml', barcode: 'DEM-1005', category: 'Beverages', price: 1.75, image: null },
 ];
 
 const quickCategories = ['All', 'Grocery', 'Beverages', 'Dairy', 'Snacks', 'Cleaning'];
@@ -53,8 +63,20 @@ const demoTables = [
   { id: 5, name: 'Bar Seat', status: 'Open' },
 ];
 
+const getProductDisplayName = (product: any) => {
+  return product?.name || product?.nameAr || product?.title || product?.itemName || product?.barcode || `Item ${product?.id || ''}`.trim();
+};
+
+const normalizeProductsForPos = (items: any[]) => {
+  return items.map((product) => ({
+    ...product,
+    name: getProductDisplayName(product),
+    barcode: product.barcode || product.sku || '',
+  }));
+};
+
 export default function POSPage() {
-  const { cart, addToCart, getTotals, clearCart, updateQty, removeFromCart, setCustomer, selectedCustomer, discount, setDiscount } = useCartStore();
+  const { cart, addToCart, setCart, clearCart, updateQty, removeFromCart, setCustomer, selectedCustomer, discount, setDiscount } = useCartStore();
   const { currentStaff, isAuthenticated, currentBranch, setBranch } = useSessionStore();
   const { modules, initModules } = useModuleStore();
   const [activePage, setActivePage] = useState('pos');
@@ -77,13 +99,59 @@ export default function POSPage() {
   const [isReceiptPreviewOpen, setIsReceiptPreviewOpen] = useState(false);
   const [receiptHtml, setReceiptHtml] = useState('');
   const [editableProduct, setEditableProduct] = useState<any>(null);
+  const [orderMode, setOrderMode] = useState('sale');
+  const [darkMode, setDarkMode] = useState(false);
   const languageLabel = useCartStore((state) => state.language === 'en' ? 'العربية' : 'English');
+
+  const saveProductsToStorage = (prods: any[]) => {
+    try {
+      localStorage.setItem('derp_products', JSON.stringify(normalizeProductsForPos(prods)));
+    } catch (e) {
+      console.error('Failed to save products to localStorage:', e);
+    }
+  };
+
+  const loadProductsFromStorage = () => {
+    try {
+      const stored = localStorage.getItem('derp_products') || localStorage.getItem('nexapos_products');
+      return stored ? JSON.parse(stored) : null;
+    } catch (e) {
+      console.error('Failed to load products from localStorage:', e);
+      return null;
+    }
+  };
+
+  const loadInventoryFromStorageForSync = () => {
+    try {
+      const stored = localStorage.getItem('derp_inventory') || localStorage.getItem('nexapos_inventory');
+      return stored ? JSON.parse(stored) : null;
+    } catch (e) {
+      return null;
+    }
+  };
 
   const toggleLanguage = () => {
     const nextLang = useCartStore.getState().language === 'en' ? 'ar' : 'en';
     useCartStore.getState().setLanguage(nextLang);
     document.body.dir = nextLang === 'ar' ? 'rtl' : 'ltr';
   };
+
+  const toggleDarkMode = () => {
+    const nextMode = !darkMode;
+    setDarkMode(nextMode);
+    localStorage.setItem('derp_dark_mode', nextMode ? 'true' : 'false');
+  };
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('derp_dark_mode');
+    if (savedTheme !== null) {
+      setDarkMode(savedTheme === 'true');
+    }
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+  }, [darkMode]);
 
   useEffect(() => {
     initModules();
@@ -95,8 +163,10 @@ export default function POSPage() {
           window.electron.getProducts(),
           window.electron.getCustomers(),
         ]);
+        const normalizedProducts = normalizeProductsForPos(productList || []);
         setBranches(branchList || []);
-        setProducts(productList || demoProducts);
+        setProducts(normalizedProducts);
+        saveProductsToStorage(normalizedProducts);
         setCustomers(customerList || demoCustomers);
 
         if (!currentBranch && branchList && branchList.length > 0) {
@@ -104,7 +174,9 @@ export default function POSPage() {
         }
       } else {
         setBranches([]);
-        setProducts(demoProducts);
+        const stored = loadProductsFromStorage() || [];
+        const base = (stored && stored.length) ? stored : demoProducts;
+        setProducts(normalizeProductsForPos(base)); // Load demo or local storage products
         setCustomers(demoCustomers);
       }
       setBranchLoading(false);
@@ -123,6 +195,7 @@ export default function POSPage() {
     if (cart.length === 0) return;
 
     const transaction = {
+      type: orderMode,
       items: cart,
       subtotal: totals.subtotal,
       discount: totals.discount,
@@ -146,7 +219,8 @@ export default function POSPage() {
       const html = await generateReceiptHtml(savedTxn, currentBranch, currentStaff);
       await window.electron.printReceipt(html);
       clearCart();
-      alert('Transaction Completed & Receipt Printed');
+      setOrderMode('sale');
+      alert(orderMode === 'return' ? 'Sales Return Completed & Receipt Printed' : 'Transaction Completed & Receipt Printed');
     }
   };
 
@@ -169,7 +243,12 @@ export default function POSPage() {
   const resumeOrder = (order: any) => {
     if (!order) return;
     setSelectedHeldOrder(order);
-    order.items.forEach((item: any) => addToCart(item));
+    setCart(order.items);
+    setHeldOrders(heldOrders.filter((held) => held.id !== order.id));
+  };
+
+  const editHeldOrder = (order: any) => {
+    resumeOrder(order);
   };
 
   const previewReceipt = async () => {
@@ -197,10 +276,22 @@ export default function POSPage() {
     setEditableProduct({ ...product });
   };
 
-  const saveProductEdits = () => {
+  const saveProductEdits = async () => {
     if (!editableProduct) return;
-    setProducts((current) => current.map((item) => (item.id === editableProduct.id ? editableProduct : item)));
-    setEditableProduct(null);
+
+    try {
+      if (window.electron) {
+        await window.electron.updateProduct(editableProduct);
+      }
+
+      const updated = normalizeProductsForPos(products.map((item) => (item.id === editableProduct.id ? editableProduct : item)));
+      setProducts(updated);
+      saveProductsToStorage(updated);
+      setEditableProduct(null);
+    } catch (error) {
+      console.error('Failed to save product changes:', error);
+      alert(`Could not save product changes: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
   const handleImageUpload = (file: File | null) => {
@@ -215,22 +306,31 @@ export default function POSPage() {
   };
 
   const filteredProducts = products.filter((product) => {
+    const displayName = getProductDisplayName(product).toLowerCase();
     const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
-    const matchesSearch = searchTerm === '' || product.name.toLowerCase().includes(searchTerm.toLowerCase()) || product.barcode?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = searchTerm === '' || displayName.includes(searchTerm.toLowerCase()) || product.barcode?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
   return (
     <div className="flex h-screen bg-slate-50">
       <Sidebar activePage={activePage} onPageChange={setActivePage} />
-      <main className="flex-1 flex flex-col p-6 overflow-hidden">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <main className="flex-1 flex flex-col overflow-hidden min-h-0 p-4 lg:p-6">
+        <div className="app-glass-shell mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3">
           <div className="flex items-center gap-3">
             <button
               onClick={toggleLanguage}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold"
+              className="rounded-xl border border-white/70 bg-white/75 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-white"
             >
               {languageLabel}
+            </button>
+            <button
+              type="button"
+              onClick={toggleDarkMode}
+              className="rounded-xl border border-white/70 bg-white/75 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-white"
+            >
+              {darkMode ? <Sun size={14} /> : <Moon size={14} />}
+              <span className="ml-1">{darkMode ? 'Light' : 'Dark'}</span>
             </button>
             <span className="text-xs text-slate-500 font-medium">UAE Time: {new Date().toLocaleTimeString('en-AE')}</span>
           </div>
@@ -241,16 +341,16 @@ export default function POSPage() {
           </div>
         </div>
 
-        {activePage === 'settings' && <ModuleSettings />}
 
-        {activePage === 'dashboard' && (
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold">Dashboard Summary</h1>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
-                <p className="text-sm text-slate-500 uppercase font-bold tracking-wider">Today's Sales</p>
-                <p className="text-3xl font-bold mt-2 text-blue-600">AED 8,420.00</p>
-              </div>
+        <div className="flex-1 min-h-0 overflow-auto rounded-3xl">
+          {activePage === 'dashboard' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold">Dashboard Summary</h1>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
+                  <p className="text-sm text-slate-500 uppercase font-bold tracking-wider">Today's Sales</p>
+                  <p className="text-3xl font-bold mt-2 text-blue-600">AED 8,420.00</p>
+                </div>
               <div className="p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
                 <p className="text-sm text-slate-500 uppercase font-bold tracking-wider">Active Tables</p>
                 <p className="text-3xl font-bold mt-2">12 / 24</p>
@@ -301,6 +401,12 @@ export default function POSPage() {
           </div>
         )}
 
+        {activePage === 'ai-insights' && (
+          <Suspense fallback={<ModuleLoadingFallback />}>
+            <AIInsights products={products} customers={customers} cart={cart} />
+          </Suspense>
+        )}
+
         {activePage === 'communications' && (
           <div className="space-y-6">
             <h1 className="text-2xl font-bold">Comms & Delivery</h1>
@@ -346,23 +452,9 @@ export default function POSPage() {
         )}
 
         {activePage === 'reports' && (
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold">Reports</h1>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-6 bg-white rounded-2xl border border-slate-200">
-                <p className="text-sm text-slate-500 uppercase font-bold tracking-wider">Monthly Sales</p>
-                <p className="text-3xl font-bold mt-2">AED 58,230</p>
-              </div>
-              <div className="p-6 bg-white rounded-2xl border border-slate-200">
-                <p className="text-sm text-slate-500 uppercase font-bold tracking-wider">Top Category</p>
-                <p className="text-3xl font-bold mt-2">Food & Beverage</p>
-              </div>
-              <div className="p-6 bg-white rounded-2xl border border-slate-200">
-                <p className="text-sm text-slate-500 uppercase font-bold tracking-wider">Active Branches</p>
-                <p className="text-3xl font-bold mt-2">3</p>
-              </div>
-            </div>
-          </div>
+          <Suspense fallback={<ModuleLoadingFallback />}>
+            <SalesReports products={products} />
+          </Suspense>
         )}
 
         {activePage === 'staff' && (
@@ -437,84 +529,65 @@ export default function POSPage() {
           </div>
         )}
 
-        {activePage === 'inventory' && (
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold">Inventory Management</h1>
-            <p className="text-slate-500">Edit product details and upload images from the inventory module.</p>
-            <div className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm">
-              <table className="min-w-full divide-y divide-slate-200 text-sm">
-                <thead className="bg-slate-100">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-semibold text-slate-700">Product</th>
-                    <th className="px-4 py-3 text-left font-semibold text-slate-700">SKU</th>
-                    <th className="px-4 py-3 text-left font-semibold text-slate-700">Price</th>
-                    <th className="px-4 py-3 text-left font-semibold text-slate-700">Image</th>
-                    <th className="px-4 py-3 text-right font-semibold text-slate-700">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 bg-white">
-                  {products.map((product: any) => (
-                    <tr key={product.id}>
-                      <td className="whitespace-nowrap px-4 py-4">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={product.image}
-                            alt={product.name}
-                            className="h-12 w-12 rounded-2xl object-cover bg-slate-100"
-                            onError={(event) => {
-                              event.currentTarget.onerror = null;
-                              event.currentTarget.src = 'https://placehold.co/96x96/ddd/555?text=Item';
-                            }}
-                          />
-                          <div>
-                            <div className="font-semibold text-slate-900">{product.name}</div>
-                            <div className="text-xs text-slate-500">{product.category}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-4 text-slate-700">{product.barcode}</td>
-                      <td className="whitespace-nowrap px-4 py-4 text-slate-700">AED {product.price.toFixed(2)}</td>
-                      <td className="px-4 py-4 text-slate-700">
-                        <div className="max-w-[160px] truncate text-xs text-slate-500">{product.image}</div>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => openEditProduct(product)}
-                          className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase text-slate-700 hover:bg-slate-100"
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <InventoryExpiry />
-          </div>
+        {activePage === 'advanced-inventory' && (
+          <AdvancedInventory
+            onInventoryUpdate={(inventoryData) => {
+              const updatedExisting = products.map((p) => {
+                const invItem = inventoryData.find((i) => i.sku === p.barcode);
+                return invItem ? { ...p, name: invItem.name || p.name, image: invItem.image, stock: invItem.stock } : p;
+              });
+              const existingBarcodes = new Set(updatedExisting.map((product) => product.barcode));
+              const newProducts = inventoryData
+                .filter((item) => item.sku && !existingBarcodes.has(item.sku))
+                .map((item) => ({
+                  id: item.id,
+                  barcode: item.sku,
+                  name: item.name,
+                  category: item.category,
+                  price: Number(item.price || 0),
+                  cost: Number(item.cost || 0),
+                  stock: Number(item.stock || 0),
+                  unit: item.unit || 'pcs',
+                  image: item.image || null,
+                }));
+              const updated = normalizeProductsForPos([...updatedExisting, ...newProducts]);
+              setProducts(updated);
+              saveProductsToStorage(updated);
+            }}
+          />
         )}
 
-        {activePage === 'advanced-inventory' && <AdvancedInventory />}
 
-        {activePage === 'accounting' && <Accounting />}
+        {activePage === 'accounting' && (
+          <Suspense fallback={<ModuleLoadingFallback />}>
+            <Accounting />
+          </Suspense>
+        )}
 
-        {activePage === 'hr-payroll' && <HRPayroll />}
+        {activePage === 'hr-payroll' && (
+          <Suspense fallback={<ModuleLoadingFallback />}>
+            <HRPayroll />
+          </Suspense>
+        )}
 
         {activePage === 'crm' && <CRM />}
 
         {activePage === 'procurement' && <Procurement />}
 
-        {activePage === 'projects' && <Projects />}
+        {activePage === 'projects' && (
+          <Suspense fallback={<ModuleLoadingFallback />}>
+            <Projects />
+          </Suspense>
+        )}
 
-        {activePage === 'admin-panel' && <AdminPanel />}
+        {activePage === 'settings-admin' && <SettingsAdmin />}
 
         {activePage === 'pos' && (
           <div className="flex flex-col gap-4 h-full overflow-hidden">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Point of Sale</p>
-                <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">NexaPOS — {currentBranch?.name || 'Main Branch'}</h1>
+                <h1 className="mt-2 whitespace-nowrap text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">dERP - {currentBranch?.name || 'Main Branch'}</h1>
                 <p className="mt-1 text-sm text-slate-500">{currentStaff.name} · {currentBranch?.location || 'Main Branch'}</p>
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -542,27 +615,8 @@ export default function POSPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-              <div className="rounded-[1.5rem] bg-slate-950/5 ring-1 ring-slate-200/70 p-5 text-slate-950 shadow-sm">
-                <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Fast Billing</p>
-                <p className="mt-3 text-lg font-semibold">Barcode & SKU Scan</p>
-              </div>
-              <div className="rounded-[1.5rem] bg-slate-950/5 ring-1 ring-slate-200/70 p-5 text-slate-950 shadow-sm">
-                <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Payments</p>
-                <p className="mt-3 text-lg font-semibold">Cash / Card / Tabby / Tamara</p>
-              </div>
-              <div className="rounded-[1.5rem] bg-slate-950/5 ring-1 ring-slate-200/70 p-5 text-slate-950 shadow-sm">
-                <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Receipt</p>
-                <p className="mt-3 text-lg font-semibold">Thermal & QR Invoice</p>
-              </div>
-              <div className="rounded-[1.5rem] bg-slate-950/5 ring-1 ring-slate-200/70 p-5 text-slate-950 shadow-sm">
-                <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Restaurant</p>
-                <p className="mt-3 text-lg font-semibold">KOT & Table Management</p>
-              </div>
-            </div>
-
-            <div className="flex flex-col xl:flex-row gap-4 flex-1 min-h-0 overflow-hidden">
-              <aside className="hidden xl:flex xl:w-72 flex-col gap-4 min-h-0 overflow-y-auto xl:max-h-[calc(100vh-7rem)] sticky top-24">
+            <div className="flex flex-col md:flex-row gap-4 flex-1 min-h-0 overflow-hidden">
+              <aside className="hidden xl:flex xl:w-56 flex-col gap-4 min-h-0 overflow-y-auto xl:max-h-[calc(100vh-7rem)] sticky top-24">
                 <div className="rounded-[1.5rem] bg-slate-950/5 ring-1 ring-slate-200/70 p-5 shadow-sm backdrop-blur-xl">
                   <h2 className="text-lg font-semibold mb-4 text-slate-950">Categories</h2>
                   <div className="space-y-3">
@@ -595,34 +649,30 @@ export default function POSPage() {
                 </div>
               </aside>
 
-              <div className="xl:flex-[2] flex flex-col gap-4 min-h-0 overflow-hidden">
-                <div className="bg-white rounded-[1.5rem] ring-1 ring-slate-200/70 p-4 overflow-auto flex-1 min-h-0 shadow-sm">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex-1 flex flex-col gap-4 min-h-0 overflow-hidden">
+                <div className="bg-white rounded-[1.5rem] ring-1 ring-slate-200/70 p-3 overflow-auto flex-1 min-h-0 shadow-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {filteredProducts.slice(0, 12).map((product) => (
                       <div
                         key={product.id}
-                        className="rounded-2xl border border-slate-200/80 bg-slate-50 p-4 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+                        className="rounded-xl border border-slate-200/80 bg-slate-50 p-2 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg"
                       >
-                        <button type="button" onClick={() => addToCart(product)} className="w-full text-left">
-                          <div className="flex items-start justify-between gap-3 min-w-0">
-                            <div className="flex items-start gap-3 min-w-0">
-                              <img
-                                src={product.image}
-                                alt={product.name}
-                                loading="lazy"
-                                onError={(event) => {
-                                  event.currentTarget.onerror = null;
-                                  event.currentTarget.src = 'https://placehold.co/96x96/ddd/555?text=Item';
-                                }}
-                                className="h-16 w-16 rounded-2xl object-cover shadow-sm bg-slate-100"
-                              />
-                              <div className="min-w-0 flex-1">
-                                <p className="font-semibold text-slate-950 line-clamp-2">{product.name}</p>
-                                <p className="mt-1 text-xs text-slate-500 truncate">SKU {product.barcode}</p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <span className="text-sm font-semibold text-slate-950">AED {product.price.toFixed(2)}</span>
+                        <button type="button" onClick={() => addToCart({ ...product, name: getProductDisplayName(product) })} className="w-full text-left">
+                          <div className="flex items-start gap-3 min-w-0">
+                            <img
+                              src={product.image}
+                              alt={getProductDisplayName(product)}
+                              loading="lazy"
+                              onError={(event) => {
+                                event.currentTarget.onerror = null;
+                                event.currentTarget.src = 'https://placehold.co/96x96/ddd/555?text=Item';
+                              }}
+                              className="h-14 w-14 rounded-xl object-cover shadow-sm bg-slate-100"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-sm text-slate-950 line-clamp-1">{getProductDisplayName(product)}</p>
+                              <p className="mt-2 text-sm font-semibold text-slate-950">AED {product.price.toFixed(2)}</p>
+                              <p className="mt-1 text-xs text-slate-500 truncate">SKU {product.barcode}</p>
                             </div>
                           </div>
                         </button>
@@ -630,8 +680,25 @@ export default function POSPage() {
                     ))}
                   </div>
                 </div>
+              </div>
 
-                <div className="bg-white rounded-[1.5rem] ring-1 ring-slate-200/70 overflow-hidden flex flex-col shadow-sm min-h-0">
+              <aside className="flex-none w-full md:w-[380px] min-w-[320px] md:sticky md:top-24 flex flex-col gap-4 overflow-y-auto max-h-[calc(100vh-100px)] pr-2 pb-10">
+                <div className="bg-white rounded-[1.5rem] ring-1 ring-slate-200/70 overflow-hidden flex flex-col shadow-sm min-h-[260px]">
+                  <div className="px-4 py-4 border-b border-slate-200/80">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <h2 className="text-lg font-semibold text-slate-950">Cart Items</h2>
+                        <p className="text-sm text-slate-500">Review the order before checkout.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => clearCart()}
+                        className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-600 hover:bg-white"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-5 gap-0 bg-slate-100 px-4 py-3 text-slate-500 text-[11px] uppercase tracking-[0.18em]">
                     <span className="md:col-span-2">Item</span>
                     <span>Qty</span>
@@ -663,19 +730,36 @@ export default function POSPage() {
                     )}
                   </div>
                 </div>
-              </div>
 
-              <aside className="xl:w-[380px] xl:sticky xl:top-24 flex flex-col gap-4 overflow-hidden">
                 <div className="bg-white rounded-[1.5rem] ring-1 ring-slate-200/70 p-4 flex flex-col gap-4 shadow-sm">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <h2 className="text-lg font-semibold">Checkout</h2>
-                      <p className="text-sm text-slate-500">Complete the order and print receipt.</p>
+                      <h2 className="text-lg font-semibold">{orderMode === 'return' ? 'Sales Return' : 'Checkout'}</h2>
+                      <p className="text-sm text-slate-500">{orderMode === 'return' ? 'Refund items and restore stock.' : 'Complete the order and print receipt.'}</p>
                     </div>
                     <div className="rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold uppercase text-slate-600 tracking-[0.18em]">{paymentMethod.toUpperCase()}</div>
                   </div>
 
                   <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2 rounded-2xl bg-slate-50 p-1">
+                      <button
+                        type="button"
+                        onClick={() => setOrderMode('sale')}
+                        className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold ${orderMode === 'sale' ? 'bg-slate-950 text-white' : 'text-slate-600 hover:bg-white'}`}
+                      >
+                        <ShoppingCart size={16} />
+                        Sale
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setOrderMode('return')}
+                        className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold ${orderMode === 'return' ? 'bg-red-600 text-white' : 'text-slate-600 hover:bg-white'}`}
+                      >
+                        <RotateCcw size={16} />
+                        Return
+                      </button>
+                    </div>
+
                     <div>
                       <label className="text-sm font-medium text-slate-700">Customer</label>
                       <select
@@ -792,9 +876,12 @@ export default function POSPage() {
                     <div className="grid grid-cols-1 gap-3">
                       <button
                         onClick={handleCharge}
-                        className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-900"
+                        className={`rounded-2xl px-4 py-3 text-sm font-semibold text-white shadow-sm transition ${orderMode === 'return' ? 'bg-red-600 hover:bg-red-700' : 'bg-slate-950 hover:bg-slate-900'}`}
                       >
-                        <span className="inline-flex items-center gap-2"><CreditCard size={18} /> Charge {selectedCurrency.symbol} {totals.total.toFixed(2)}</span>
+                        <span className="inline-flex items-center gap-2">
+                          {orderMode === 'return' ? <RotateCcw size={18} /> : <CreditCard size={18} />}
+                          {orderMode === 'return' ? 'Refund' : 'Charge'} {selectedCurrency.symbol} {totals.total.toFixed(2)}
+                        </span>
                       </button>
                       <button
                         onClick={previewReceipt}
@@ -819,14 +906,22 @@ export default function POSPage() {
                   ) : (
                     <div className="space-y-2">
                       {heldOrders.slice(0, 3).map((order: any) => (
-                        <button
-                          key={order.id}
-                          onClick={() => resumeOrder(order)}
-                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-left text-sm text-slate-800 transition hover:bg-slate-100"
-                        >
-                          <div className="font-semibold">{order.label}</div>
-                          <div className="text-xs text-slate-500">{order.customer} · {order.table}</div>
-                        </button>
+                        <div key={order.id} className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-800">
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <div className="font-semibold">{order.label}</div>
+                              <div className="text-xs text-slate-500">{order.customer} · {order.table}</div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => editHeldOrder(order)}
+                              className="inline-flex items-center gap-1 rounded-xl bg-white px-3 py-2 text-xs font-semibold text-slate-700"
+                            >
+                              <Edit3 size={14} />
+                              Edit
+                            </button>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -895,7 +990,7 @@ export default function POSPage() {
                       <label className="block text-sm font-medium text-slate-700">Image URL</label>
                       <input
                         type="text"
-                        value={editableProduct.image}
+                        value={editableProduct.image || ''}
                         onChange={(e) => setEditableProduct({ ...editableProduct, image: e.target.value })}
                         className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none"
                       />
@@ -982,6 +1077,7 @@ export default function POSPage() {
             </div>
           </div>
         )}
+      </div>
       </main>
     </div>
   );

@@ -10,6 +10,7 @@ export const useModuleStore = create((set) => ({
     commissions: false,
     whatsapp: true,
     multiBranch: false,
+    ai: true,
   },
   initModules: async () => {
     if (!window.electron) return; // Silent return if in browser
