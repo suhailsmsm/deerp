@@ -2,8 +2,19 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { PrismaClient } = require('@prisma/client');
 const fs = require('fs');
+const { startServer } = require('./api/server');
 
 const prisma = new PrismaClient();
+
+// Start API server on app ready
+let apiServer;
+app.on('ready', async () => {
+  try {
+    apiServer = await startServer();
+  } catch (error) {
+    console.error('Failed to start API server:', error);
+  }
+});
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -312,6 +323,9 @@ app.whenReady().then(createWindow);
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     prisma.$disconnect();
+    if (apiServer) {
+      apiServer.close();
+    }
     app.quit();
   }
 });
