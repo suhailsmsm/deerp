@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { crmService } from '../../services/api';
 
-export default function CrmScreen() {
+export default function CrmScreen({ navigation }) {
   const [customers, setCustomers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [search, setSearch] = useState('');
@@ -39,7 +39,10 @@ export default function CrmScreen() {
   };
 
   const renderCustomer = ({ item }) => (
-    <TouchableOpacity style={styles.customerCard}>
+    <TouchableOpacity
+      style={styles.customerCard}
+      onPress={() => navigation.navigate('CustomerDetail', { customerId: item.id })}
+    >
       <Text style={styles.customerName}>{item.name}</Text>
       <Text style={styles.customerPhone}>{item.phone}</Text>
       <Text style={styles.customerLoyalty}>Loyalty Points: {item.loyalty}</Text>

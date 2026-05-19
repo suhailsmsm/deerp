@@ -8,7 +8,13 @@ import { useSettingsStore } from './src/store/settingsStore';
 
 import { LoginScreen } from './src/screens/Auth/LoginScreen';
 import PosScreen from './src/screens/POS/PosScreen';
+import { ProductsScreen } from './src/screens/POS/ProductsScreen';
+import { CartScreen } from './src/screens/POS/CartScreen';
+import { CheckoutScreen } from './src/screens/POS/CheckoutScreen';
+import { ReceiptScreen } from './src/screens/POS/ReceiptScreen';
 import CrmScreen from './src/screens/CRM/CrmScreen';
+import { CustomerDetailScreen } from './src/screens/CRM/CustomerDetailScreen';
+import { CreateOrderScreen } from './src/screens/CRM/CreateOrderScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
 
 const Stack = createNativeStackNavigator();
@@ -21,12 +27,28 @@ function PosStack() {
         headerShown: true,
         headerStyle: { backgroundColor: '#f5f5f5' },
         headerTitleStyle: { fontSize: 18, fontWeight: '600' },
+        headerTintColor: '#007AFF',
       }}
     >
       <Stack.Screen
-        name="PosHome"
-        component={PosScreen}
-        options={{ title: 'Point of Sale' }}
+        name="Products"
+        component={ProductsScreen}
+        options={{ title: 'Products' }}
+      />
+      <Stack.Screen
+        name="Cart"
+        component={CartScreen}
+        options={{ title: 'Shopping Cart' }}
+      />
+      <Stack.Screen
+        name="Checkout"
+        component={CheckoutScreen}
+        options={{ title: 'Checkout' }}
+      />
+      <Stack.Screen
+        name="Receipt"
+        component={ReceiptScreen}
+        options={{ title: 'Receipt' }}
       />
     </Stack.Navigator>
   );
@@ -39,12 +61,23 @@ function CrmStack() {
         headerShown: true,
         headerStyle: { backgroundColor: '#f5f5f5' },
         headerTitleStyle: { fontSize: 18, fontWeight: '600' },
+        headerTintColor: '#007AFF',
       }}
     >
       <Stack.Screen
-        name="CrmHome"
+        name="Customers"
         component={CrmScreen}
-        options={{ title: 'CRM' }}
+        options={{ title: 'Customers' }}
+      />
+      <Stack.Screen
+        name="CustomerDetail"
+        component={CustomerDetailScreen}
+        options={{ title: 'Customer Details', headerBackTitle: 'Back' }}
+      />
+      <Stack.Screen
+        name="CreateOrder"
+        component={CreateOrderScreen}
+        options={{ title: 'New Order', headerBackTitle: 'Back' }}
       />
     </Stack.Navigator>
   );
@@ -75,35 +108,36 @@ function MainApp() {
         headerShown: false,
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: '#999',
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '500' },
       }}
     >
       <Tab.Screen
-        name="POS"
+        name="POSTab"
         component={PosStack}
         options={{
           tabBarLabel: 'POS',
           tabBarIcon: ({ color }) => (
-            <View style={{ width: 24, height: 24, backgroundColor: color }} />
+            <View style={{ width: 24, height: 24, backgroundColor: color, borderRadius: 4 }} />
           ),
         }}
       />
       <Tab.Screen
-        name="CRM"
+        name="CRMTab"
         component={CrmStack}
         options={{
           tabBarLabel: 'CRM',
           tabBarIcon: ({ color }) => (
-            <View style={{ width: 24, height: 24, backgroundColor: color }} />
+            <View style={{ width: 24, height: 24, backgroundColor: color, borderRadius: 4 }} />
           ),
         }}
       />
       <Tab.Screen
-        name="Settings"
+        name="SettingsTab"
         component={SettingsStack}
         options={{
           tabBarLabel: 'Settings',
           tabBarIcon: ({ color }) => (
-            <View style={{ width: 24, height: 24, backgroundColor: color }} />
+            <View style={{ width: 24, height: 24, backgroundColor: color, borderRadius: 4 }} />
           ),
         }}
       />
