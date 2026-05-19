@@ -9,13 +9,14 @@ router.get('/profile', async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.userId },
-      include: { tenant: { select: { id: true, name: true, plan: true } } },
       select: {
         id: true,
         email: true,
         role: true,
         tenantId: true,
-        tenant: true,
+        tenant: {
+          select: { id: true, name: true, plan: true },
+        },
       },
     });
 

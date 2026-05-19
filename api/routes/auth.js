@@ -37,6 +37,7 @@ router.post('/login', async (req, res, next) => {
         where: { id: user.id },
         data: {
           mobileToken: refreshToken,
+          mobileDeviceId: req.body.deviceId,
           lastMobileSync: new Date(),
         },
       });
