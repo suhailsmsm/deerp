@@ -8,6 +8,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { useAuthStore } from '../../store/authStore';
 
@@ -40,7 +41,7 @@ export function LoginScreen({ navigation }) {
       style={styles.container}
     >
       <View style={styles.content}>
-        <Text style={styles.title}>dERP Mobile</Text>
+        <Image source={require('../../../assets/logo.png')} style={styles.loginLogo} />
         <Text style={styles.subtitle}>Point of Sale & CRM</Text>
 
         <View style={styles.form}>
@@ -95,7 +96,7 @@ export function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0f172a',
   },
   content: {
     flex: 1,
@@ -107,38 +108,47 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 8,
-    color: '#333',
+    color: '#fff',
   },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
     marginBottom: 40,
-    color: '#666',
+    color: '#cbd5e1',
   },
   form: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 20,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 16,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
+    borderColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 10,
+    padding: 14,
     marginBottom: 16,
     fontSize: 16,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    color: '#fff',
   },
   button: {
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
-    padding: 12,
+    backgroundColor: '#2563eb',
+    borderRadius: 10,
+    padding: 14,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 24,
+    shadowColor: '#2563eb',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
   },
   buttonDisabled: {
     opacity: 0.6,
@@ -146,17 +156,25 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   error: {
-    color: '#d32f2f',
+    color: '#ff6b6b',
     marginBottom: 16,
     textAlign: 'center',
+    fontSize: 14,
   },
   version: {
     textAlign: 'center',
     marginTop: 40,
-    color: '#999',
+    color: '#64748b',
     fontSize: 12,
+  },
+  loginLogo: {
+    width: 36,
+    height: 36,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    marginBottom: 12,
   },
 });

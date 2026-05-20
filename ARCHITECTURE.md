@@ -1,4 +1,4 @@
-# dERP - System Architecture
+# DERPX - System Architecture
 
 ## Core Stack
 - **Backend:** Electron (Node.js) + Prisma (ORM) + SQLite (Local) / PostgreSQL (Cloud).

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
 import { authService } from '../services/api';
+import { tokenStorage } from '../services/tokenStorage';
 
 export const useAuthStore = create((set) => ({
   user: null,
@@ -16,9 +16,9 @@ export const useAuthStore = create((set) => ({
     try {
       const data = await authService.login(email, password, tenantId, deviceId);
 
-      await SecureStore.setItemAsync('accessToken', data.accessToken);
-      await SecureStore.setItemAsync('refreshToken', data.refreshToken);
-      await SecureStore.setItemAsync('user', JSON.stringify(data.user));
+      await tokenStorage.setItemAsync('accessToken', data.accessToken);
+      await tokenStorage.setItemAsync('refreshToken', data.refreshToken);
+      await tokenStorage.setItemAsync('user', JSON.stringify(data.user));
 
       set({
         user: data.user,
@@ -39,26 +39,26 @@ export const useAuthStore = create((set) => ({
     set({ isLoading: true });
     try {
       await authService.logout();
-      await SecureStore.deleteItemAsync('accessToken');
-      await SecureStore.deleteItemAsync('refreshToken');
-      await SecureStore.deleteItemAsync('user');
+      await tokenStorage.deleteItemAsync('accessToken');
+      await tokenStorage.deleteItemAsync('refreshToken');
+      await tokenStorage.deleteItemAsync('user');
 
       set({ user: null, accessToken: null, refreshToken: null, isLoading: false });
     } catch (error) {
       set({ isLoading: false });
       // Even if logout fails, clear local storage
-      await SecureStore.deleteItemAsync('accessToken');
-      await SecureStore.deleteItemAsync('refreshToken');
-      await SecureStore.deleteItemAsync('user');
+      await tokenStorage.deleteItemAsync('accessToken');
+      await tokenStorage.deleteItemAsync('refreshToken');
+      await tokenStorage.deleteItemAsync('user');
       set({ user: null, accessToken: null, refreshToken: null });
     }
   },
 
   restoreSession: async () => {
     try {
-      const user = await SecureStore.getItemAsync('user');
-      const accessToken = await SecureStore.getItemAsync('accessToken');
-      const refreshToken = await SecureStore.getItemAsync('refreshToken');
+      const user = await tokenStorage.getItemAsync('user');
+      const accessToken = await tokenStorage.getItemAsync('accessToken');
+      const refreshToken = await tokenStorage.getItemAsync('refreshToken');
 
       if (user && accessToken && refreshToken) {
         set({

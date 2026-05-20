@@ -17,7 +17,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cors({
-  origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5174', 'http://localhost:8081'],
+  origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:5174', 'http://localhost:8081', 'http://localhost:8090', 'http://localhost:8091'],
   credentials: true,
 }));
 

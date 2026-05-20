@@ -1,4 +1,4 @@
-# 📊 dERP Dependency Audit Report
+# 📊 DERPX Dependency Audit Report
 **Generated**: May 19, 2026 | **Project**: deerp (React/Electron POS System)
 
 ---

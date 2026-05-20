@@ -134,7 +134,7 @@ export default function SettingsScreen({ navigation }) {
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.version}>dERP Mobile v1.0.0</Text>
+        <Text style={styles.version}>DERPX Mobile v1.0.0</Text>
       </View>
     </ScrollView>
   );
@@ -143,34 +143,34 @@ export default function SettingsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0f172a',
   },
   section: {
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255,255,255,0.08)',
     marginBottom: 12,
     paddingHorizontal: 12,
     paddingVertical: 16,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#ddd',
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: '#333',
+    color: '#fff',
   },
   profileItem: {
     marginBottom: 12,
   },
   profileLabel: {
     fontSize: 12,
-    color: '#666',
+    color: '#94a3b8',
     marginBottom: 4,
   },
   profileValue: {
     fontSize: 16,
-    color: '#333',
+    color: '#fff',
     fontWeight: '500',
   },
   settingItem: {
@@ -179,11 +179,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: 'rgba(255,255,255,0.08)',
   },
   settingLabel: {
     fontSize: 16,
-    color: '#333',
+    color: '#fff',
   },
   infoItem: {
     flexDirection: 'row',
@@ -191,37 +191,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: 'rgba(255,255,255,0.08)',
   },
   infoLabel: {
     fontSize: 16,
-    color: '#333',
+    color: '#fff',
   },
   infoValue: {
     fontSize: 16,
-    color: '#007AFF',
+    color: '#3b82f6',
     fontWeight: '500',
   },
   button: {
-    borderRadius: 8,
+    borderRadius: 10,
     padding: 12,
     alignItems: 'center',
     marginVertical: 8,
   },
   logoutButton: {
-    backgroundColor: '#d32f2f',
+    backgroundColor: '#dc2626',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   footer: {
     alignItems: 'center',
     paddingVertical: 24,
   },
   version: {
-    color: '#999',
+    color: '#64748b',
     fontSize: 12,
   },
 });

@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, Suspense } from 'react';
-import { ShoppingCart, CreditCard, Receipt, Search, Plus, Minus, Trash2, Users, Package, MessageSquare, Building2, Edit3, RotateCcw, Sun, Moon } from 'lucide-react';
+import { ShoppingCart, CreditCard, Receipt, Search, Plus, Minus, Trash2, Users, Package, MessageSquare, Building2, Edit3, RotateCcw, Sun, Moon, Gift, Tag, Share2, Facebook, Instagram, Linkedin, Twitter, Globe, Send, Calendar, Hash, Image as ImageIcon, Video } from 'lucide-react';
 import { useCartStore } from './cartStore';
 import { useSessionStore } from './sessionStore';
 import { useModuleStore } from './moduleStore';
@@ -38,6 +38,26 @@ const demoCustomers = [
   { id: 3, name: 'Khalid Ibrahim' },
   { id: 4, name: 'Sara Mohammed' },
   { id: 5, name: 'Omar Al Hamdan' },
+];
+
+const demoPromotions = [
+  { id: 1, title: 'Summer Sale', code: 'SUMMER20', discount: '20%', type: 'Percentage', status: 'Active' },
+  { id: 2, title: 'First Purchase', code: 'WELCOME10', discount: 'AED 10', type: 'Fixed', status: 'Active' },
+  { id: 3, title: 'Buy 1 Get 1 Coffee', code: 'BOGO-COFFEE', discount: '100%', type: 'BOGO', status: 'Active' },
+  { id: 4, title: 'Weekend Special', code: 'WEEKEND', discount: '15%', type: 'Percentage', status: 'Expired' },
+];
+
+const demoLoyaltyTiers = [
+  { name: 'Bronze', threshold: 0, customers: 142, color: 'text-amber-700' },
+  { name: 'Silver', threshold: 500, customers: 85, color: 'text-slate-400' },
+  { name: 'Gold', threshold: 2000, customers: 24, color: 'text-yellow-500' },
+  { name: 'Platinum', threshold: 5000, customers: 8, color: 'text-indigo-400' },
+];
+
+const demoLoyaltyActivity = [
+  { id: 1, customer: 'Mohammed Al Rashid', points: '+45', date: '2 mins ago', action: 'Purchase' },
+  { id: 2, customer: 'Fatima Al Zaabi', points: '-100', date: '1 hour ago', action: 'Redemption' },
+  { id: 3, customer: 'Khalid Ibrahim', points: '+12', date: '3 hours ago', action: 'Review' },
 ];
 
 const demoProducts = [
@@ -101,7 +121,14 @@ export default function POSPage() {
   const [editableProduct, setEditableProduct] = useState<any>(null);
   const [orderMode, setOrderMode] = useState('sale');
   const [darkMode, setDarkMode] = useState(false);
-  const languageLabel = useCartStore((state) => state.language === 'en' ? 'العربية' : 'English');
+
+  // Social Poster State
+  const [socialContent, setSocialContent] = useState('');
+  const [isGeneratingHashtags, setIsGeneratingHashtags] = useState(false);
+  const [socialPlatforms, setSocialPlatforms] = useState({
+    facebook: true, instagram: true, linkedin: false, twitter: true, google: true
+  });
+  const [scheduledDate, setScheduledDate] = useState('');
 
   const saveProductsToStorage = (prods: any[]) => {
     try {
@@ -128,12 +155,6 @@ export default function POSPage() {
     } catch (e) {
       return null;
     }
-  };
-
-  const toggleLanguage = () => {
-    const nextLang = useCartStore.getState().language === 'en' ? 'ar' : 'en';
-    useCartStore.getState().setLanguage(nextLang);
-    document.body.dir = nextLang === 'ar' ? 'rtl' : 'ltr';
   };
 
   const toggleDarkMode = () => {
@@ -305,6 +326,15 @@ export default function POSPage() {
     reader.readAsDataURL(file);
   };
 
+  const generateAIHashtags = () => {
+    setIsGeneratingHashtags(true);
+    setTimeout(() => {
+      const hashtags = "\n\n#DERPX #Enterprise #Ai #BusinessGrowth #SmartPOS #Innovation #UAEBusiness";
+      setSocialContent(prev => prev + hashtags);
+      setIsGeneratingHashtags(false);
+    }, 1200);
+  };
+
   const filteredProducts = products.filter((product) => {
     const displayName = getProductDisplayName(product).toLowerCase();
     const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory;
@@ -318,20 +348,18 @@ export default function POSPage() {
       <main className="flex-1 flex flex-col overflow-hidden min-h-0 p-4 lg:p-6">
         <div className="app-glass-shell mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3">
           <div className="flex items-center gap-3">
-            <button
-              onClick={toggleLanguage}
-              className="rounded-xl border border-white/70 bg-white/75 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-white"
-            >
-              {languageLabel}
-            </button>
+            <img src="/assets/logo.png" alt="DERPX Ai" className="h-8 object-contain" />
+            <span className="ml-2 text-lg font-extrabold">DERPX Ai</span>
             <button
               type="button"
               onClick={toggleDarkMode}
-              className="rounded-xl border border-white/70 bg-white/75 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-white"
+              className="rounded-xl border border-white/70 bg-white/75 px-8 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-white flex items-center justify-start"
             >
               {darkMode ? <Sun size={14} /> : <Moon size={14} />}
               <span className="ml-1">{darkMode ? 'Light' : 'Dark'}</span>
             </button>
+          </div>
+          <div className="flex items-center gap-3">
             <span className="text-xs text-slate-500 font-medium">UAE Time: {new Date().toLocaleTimeString('en-AE')}</span>
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -366,11 +394,99 @@ export default function POSPage() {
           </div>
         )}
 
+        {activePage === 'loyalty' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold">Loyalty & Promotions</h1>
+              <div className="flex gap-2">
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold flex items-center gap-2">
+                  <Plus size={16} /> New Promo
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {demoLoyaltyTiers.map(tier => (
+                <div key={tier.name} className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                  <p className={`text-xs font-bold uppercase tracking-wider ${tier.color}`}>{tier.name} Tier</p>
+                  <p className="text-2xl font-bold mt-1">{tier.customers}</p>
+                  <p className="text-xs text-slate-500 mt-1">{tier.threshold}+ points</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+                  <Tag size={18} className="text-blue-600" />
+                  <h2 className="font-bold">Active Promotions</h2>
+                </div>
+                <div className="divide-y divide-slate-100">
+                  {demoPromotions.map(promo => (
+                    <div key={promo.id} className="px-6 py-4 flex items-center justify-between">
+                      <div>
+                        <p className="font-bold text-slate-900">{promo.title}</p>
+                        <p className="text-xs text-slate-500 font-mono mt-1">CODE: {promo.code}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase ${promo.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
+                          {promo.status}
+                        </span>
+                        <p className="text-sm font-bold mt-1 text-blue-600">{promo.discount} OFF</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
+                  <Gift size={18} className="text-purple-600" />
+                  <h2 className="font-bold">Recent Points Activity</h2>
+                </div>
+                <div className="divide-y divide-slate-100">
+                  {demoLoyaltyActivity.map(act => (
+                    <div key={act.id} className="px-6 py-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-full ${act.points.startsWith('+') ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                          <RotateCcw size={14} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-slate-900">{act.customer}</p>
+                          <p className="text-xs text-slate-500">{act.action} · {act.date}</p>
+                        </div>
+                      </div>
+                      <span className={`font-bold ${act.points.startsWith('+') ? 'text-emerald-600' : 'text-red-600'}`}>
+                        {act.points}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activePage === 'crm' && (
           <div className="space-y-6">
-            <h1 className="text-2xl font-bold">Customer Management (CRM)</h1>
-            <div className="p-10 bg-white rounded-2xl border border-dashed border-slate-300 text-center text-slate-400">
-              Customer List and Loyalty Management module is currently in Demo Mode.
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold">Customer Management (CRM)</h1>
+              <button className="px-4 py-2 bg-slate-950 text-white rounded-xl text-sm font-bold flex items-center gap-2">
+                <Plus size={16} /> Add Customer
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {demoCustomers.map(customer => (
+                <div key={customer.id} className="p-5 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold">
+                    {customer.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900">{customer.name}</p>
+                    <p className="text-xs text-slate-500">Tier: Gold · 2,450 Points</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -446,6 +562,112 @@ export default function POSPage() {
                 <p className="text-sm text-slate-500 mt-1">Supplier: Fresh Produce Co.</p>
                 <p className="mt-3 text-xl font-bold">AED 980.20</p>
                 <p className="mt-2 text-sm text-slate-600">Status: Pending Approval</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activePage === 'social-poster' && (
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-bold">Social Media Poster</h1>
+              <div className="flex gap-2">
+                <button className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-bold border border-slate-200 hover:bg-white transition-colors">
+                  History
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex -space-x-2">
+                      {[
+                        { id: 'facebook', icon: Facebook, color: 'bg-blue-600' },
+                        { id: 'instagram', icon: Instagram, color: 'bg-pink-600' },
+                        { id: 'twitter', icon: Twitter, color: 'bg-sky-500' },
+                        { id: 'linkedin', icon: Linkedin, color: 'bg-blue-700' },
+                        { id: 'google', icon: Globe, color: 'bg-emerald-500' }
+                      ].map(platform => (
+                        <button
+                          key={platform.id}
+                          onClick={() => setSocialPlatforms(prev => ({ ...prev, [platform.id]: !prev[platform.id as keyof typeof prev] }))}
+                          className={`w-10 h-10 rounded-full border-2 border-white flex items-center justify-center text-white transition-all transform hover:scale-110 ${platform.color} ${socialPlatforms[platform.id as keyof typeof socialPlatforms] ? 'opacity-100' : 'opacity-20 grayscale'}`}
+                        >
+                          <platform.icon size={16} />
+                        </button>
+                      ))}
+                    </div>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Target Channels</span>
+                  </div>
+
+                  <div className="relative">
+                    <textarea
+                      value={socialContent}
+                      onChange={(e) => setSocialContent(e.target.value)}
+                      placeholder="What's happening in your business? Share an update, deal, or new arrival..."
+                      className="w-full h-48 rounded-2xl border border-slate-100 bg-slate-50/50 p-5 text-slate-800 placeholder:text-slate-400 outline-none focus:border-blue-500 transition-all resize-none"
+                    />
+                    <button 
+                      onClick={generateAIHashtags}
+                      disabled={isGeneratingHashtags}
+                      className="absolute bottom-4 right-4 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold border border-indigo-100 flex items-center gap-1 hover:bg-indigo-100"
+                    >
+                      {isGeneratingHashtags ? <RotateCcw size={12} className="animate-spin" /> : <Hash size={12} />}
+                      {isGeneratingHashtags ? 'AI Thinking...' : 'AI Hashtags'}
+                    </button>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button className="flex-1 px-4 py-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 text-slate-500 flex items-center justify-center gap-2 hover:bg-white hover:border-blue-400 hover:text-blue-600 transition-all">
+                      <ImageIcon size={18} /> Add Photo
+                    </button>
+                    <button className="flex-1 px-4 py-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 text-slate-500 flex items-center justify-center gap-2 hover:bg-white hover:border-blue-400 hover:text-blue-600 transition-all">
+                      <Video size={18} /> Add Video
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <Calendar size={18} className="text-slate-400" />
+                    <input 
+                      type="datetime-local" 
+                      value={scheduledDate}
+                      onChange={(e) => setScheduledDate(e.target.value)}
+                      className="text-sm font-medium text-slate-600 outline-none bg-transparent"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button className="px-6 py-3 bg-slate-100 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors">
+                      Save Draft
+                    </button>
+                    <button className="px-8 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all">
+                      <Send size={18} /> {scheduledDate ? 'Schedule Post' : 'Publish Now'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Preview</h3>
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 rounded-full bg-slate-200" />
+                      <div className="flex-1">
+                        <div className="h-3 w-24 bg-slate-100 rounded-full mb-1" />
+                        <div className="h-2 w-16 bg-slate-50 rounded-full" />
+                      </div>
+                    </div>
+                    <div className="text-sm text-slate-600 whitespace-pre-wrap min-h-[100px]">
+                      {socialContent || "Start typing to see how your post looks..."}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -587,7 +809,7 @@ export default function POSPage() {
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="text-sm uppercase tracking-[0.18em] text-slate-500">Point of Sale</p>
-                <h1 className="mt-2 whitespace-nowrap text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">dERP - {currentBranch?.name || 'Main Branch'}</h1>
+                <h1 className="mt-2 whitespace-nowrap text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">DERPX - {currentBranch?.name || 'Main Branch'}</h1>
                 <p className="mt-1 text-sm text-slate-500">{currentStaff.name} · {currentBranch?.location || 'Main Branch'}</p>
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

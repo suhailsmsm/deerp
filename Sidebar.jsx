@@ -11,12 +11,6 @@ export default function Sidebar({ activePage, onPageChange }) {
 
   const groups = [
     {
-      label: 'System',
-      items: [
-        { id: 'settings-admin', label: 'Settings & Admin', icon: Settings, enabled: true },
-      ]
-    },
-    {
       label: 'Operations',
       items: [
         { id: 'pos', label: 'Point of Sale', icon: ShoppingCart, enabled: true },
@@ -63,9 +57,12 @@ export default function Sidebar({ activePage, onPageChange }) {
 
   return (
     <aside className="w-64 bg-slate-900 text-white h-screen flex flex-col">
-      <div className="p-6">
-        <h1 className="text-xl font-bold text-blue-400">dERP</h1>
-        <p className="text-xs text-slate-500 uppercase tracking-widest mt-1">Enterprise Suite</p>
+      <div className="p-6 flex items-center gap-3">
+        <img src="/assets/logo.png" alt="DERPX Ai" className="h-10 object-contain" />
+        <div>
+          <div className="text-sm font-bold text-blue-400">DERPX Ai</div>
+          <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Enterprise Suite</p>
+        </div>
       </div>
       
       <nav className="flex-1 px-4 space-y-1 overflow-auto">
@@ -95,8 +92,16 @@ export default function Sidebar({ activePage, onPageChange }) {
         ))}
       </nav>
       
-      <div className="p-6 border-t border-slate-800 text-[10px] text-slate-500 text-center">
-        V1.0.0 · Local SQLite
+      <div className="p-4 border-t border-slate-800">
+        <button
+          onClick={() => onPageChange('settings-admin')}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-400 hover:bg-slate-800 hover:text-slate-200`}
+        >
+          <Settings size={18} />
+          <span className="font-medium">Settings & Admin</span>
+        </button>
+
+        <div className="mt-4 text-[10px] text-slate-500 text-center">V1.0.0 · Local SQLite</div>
       </div>
     </aside>
   );

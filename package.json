@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
+    "api": "node api/server.js",
+    "dev:all": "concurrently \"npm run dev\" \"npm run api\"",
     "dev": "vite --port 5174",
     "build": "vite build",
     "preview": "vite preview",
@@ -11,7 +13,7 @@
   },
   "build": {
     "appId": "com.derp.erp",
-    "productName": "dERP",
+    "productName": "DERPX",
     "files": [
       "main.js",
       "preload.js",

@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ActivityIndicator, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from './src/store/authStore';
 import { useSettingsStore } from './src/store/settingsStore';
 
@@ -25,9 +26,9 @@ function PosStack() {
     <Stack.Navigator
       screenOptions={{
         headerShown: true,
-        headerStyle: { backgroundColor: '#f5f5f5' },
-        headerTitleStyle: { fontSize: 18, fontWeight: '600' },
-        headerTintColor: '#007AFF',
+        headerStyle: { backgroundColor: '#0f172a', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)' },
+        headerTitleStyle: { fontSize: 18, fontWeight: '700', color: '#fff' },
+        headerTintColor: '#3b82f6',
       }}
     >
       <Stack.Screen
@@ -59,9 +60,9 @@ function CrmStack() {
     <Stack.Navigator
       screenOptions={{
         headerShown: true,
-        headerStyle: { backgroundColor: '#f5f5f5' },
-        headerTitleStyle: { fontSize: 18, fontWeight: '600' },
-        headerTintColor: '#007AFF',
+        headerStyle: { backgroundColor: '#0f172a', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)' },
+        headerTitleStyle: { fontSize: 18, fontWeight: '700', color: '#fff' },
+        headerTintColor: '#3b82f6',
       }}
     >
       <Stack.Screen
@@ -88,8 +89,9 @@ function SettingsStack() {
     <Stack.Navigator
       screenOptions={{
         headerShown: true,
-        headerStyle: { backgroundColor: '#f5f5f5' },
-        headerTitleStyle: { fontSize: 18, fontWeight: '600' },
+        headerStyle: { backgroundColor: '#0f172a', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)' },
+        headerTitleStyle: { fontSize: 18, fontWeight: '700', color: '#fff' },
+        headerTintColor: '#3b82f6',
       }}
     >
       <Stack.Screen
@@ -106,9 +108,12 @@ function MainApp() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: '#999',
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '500' },
+        tabBarActiveTintColor: '#3b82f6',
+        tabBarInactiveTintColor: '#64748b',
+        tabBarLabelStyle: { fontSize: 13, fontWeight: '700' },
+        tabBarLabelPosition: 'beside-icon',
+        tabBarStyle: { height: 68, paddingHorizontal: 12, backgroundColor: '#0f172a', borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },
+        tabBarItemStyle: { paddingHorizontal: 8, justifyContent: 'flex-start', alignItems: 'center' },
       }}
     >
       <Tab.Screen
@@ -116,8 +121,8 @@ function MainApp() {
         component={PosStack}
         options={{
           tabBarLabel: 'POS',
-          tabBarIcon: ({ color }) => (
-            <View style={{ width: 24, height: 24, backgroundColor: color, borderRadius: 4 }} />
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="cart-outline" size={20} color={color} />
           ),
         }}
       />
@@ -126,8 +131,8 @@ function MainApp() {
         component={CrmStack}
         options={{
           tabBarLabel: 'CRM',
-          tabBarIcon: ({ color }) => (
-            <View style={{ width: 24, height: 24, backgroundColor: color, borderRadius: 4 }} />
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="people-outline" size={20} color={color} />
           ),
         }}
       />
@@ -136,8 +141,8 @@ function MainApp() {
         component={SettingsStack}
         options={{
           tabBarLabel: 'Settings',
-          tabBarIcon: ({ color }) => (
-            <View style={{ width: 24, height: 24, backgroundColor: color, borderRadius: 4 }} />
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="settings-outline" size={20} color={color} />
           ),
         }}
       />

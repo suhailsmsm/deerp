@@ -5,7 +5,7 @@ export const generateReceiptHtml = async (transaction, branch, staff) => {
   const dateStr = new Date().toLocaleString('en-AE');
   
   const qrData = await window.electron.generateQr({
-    seller: branch?.name || 'dERP',
+    seller: branch?.name || 'DERPX',
     trn: branch?.trn || '100XXXXXXXXXXXX',
     timestamp: transaction.createdAt,
     total: transaction.total.toFixed(2),
@@ -27,7 +27,7 @@ export const generateReceiptHtml = async (transaction, branch, staff) => {
       </style>
       <body>
         <div class="header text-center">
-          <h2 style="margin:0">${branch?.name || 'dERP'}</h2>
+          <h2 style="margin:0">${branch?.name || 'DERPX'}</h2>
           <div>TRN: ${branch?.trn || '100XXXXXXXXXXXX'}</div>
           <div>${dateStr}</div>
         </div>

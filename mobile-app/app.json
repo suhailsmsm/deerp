@@ -1,14 +1,16 @@
 {
   "expo": {
-    "name": "dERP Mobile",
-    "slug": "deerp-mobile",
+    "owner": "suhailsmsm",
+    "name": "DERPX Mobile",
+    "slug": "derpx-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "deerp",
+    "scheme": "derpx",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTabletMode": true
+      "supportsTabletMode": true,
+      "bundleIdentifier": "com.anonymous.deerp-mobile"
     },
     "android": {
       "adaptiveIcon": {

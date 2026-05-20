@@ -1,7 +1,7 @@
 # Mobile App Implementation Plan
 
 ## Overview
-Create a React Native mobile app for dERP with limited features (POS, CRM, mobile settings), sharing a REST API backend with the existing Electron desktop app.
+Create a React Native mobile app for DERPX with limited features (POS, CRM, mobile settings), sharing a REST API backend with the existing Electron desktop app.
 
 **Stack:**
 - Frontend: React Native (Expo for easier development)

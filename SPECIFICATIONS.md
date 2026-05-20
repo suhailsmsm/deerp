@@ -1,4 +1,4 @@
-# dERP System - Complete Specifications
+# DERPX System - Complete Specifications
 
 ## Overview
 A comprehensive, modern ERP system built for UAE businesses with bilingual support, multi-branch management, and full compliance with local regulations.
