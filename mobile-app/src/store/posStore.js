@@ -1,13 +1,8 @@
 import { create } from 'zustand';
 import { posService } from '../services/api';
 
-// Only import database modules on native platforms (not web)
-let db, sync;
-if (typeof window === 'undefined' || window.navigator?.product === 'ReactNative') {
-  // Native platform
-  import('../db/database').then(module => { db = module; });
-  import('../db/syncService').then(module => { sync = module; });
-}
+// Platform detection
+const isWeb = typeof window !== 'undefined' && !window.navigator?.product?.includes('ReactNative');
 
 export const usePosStore = create((set, get) => ({
   cart: [],
@@ -20,21 +15,23 @@ export const usePosStore = create((set, get) => ({
   error: null,
   syncStatus: { online: true, pending: 0, unsynced: 0 },
 
-  // Initialize database on store creation (native only)
+  // Initialize store
   init: async () => {
-    if (!db || !sync) {
-      console.log('📱 Web platform: skipping database initialization');
-      return;
+    if (isWeb) {
+      console.log('🌐 Web platform initialized');
+    } else {
+      console.log('📱 Native platform initialized');
+      // Native: initialize database
+      try {
+        const { initDatabase, initSyncSystem } = await import('../db');
+        await initDatabase();
+        await initSyncSystem();
+        console.log('✅ Database initialized');
+      } catch (error) {
+        console.error('❌ Database init failed:', error);
+      }
     }
-    try {
-      await db.initDatabase();
-      await sync.initSyncSystem();
-      get().updateSyncStatus();
-      console.log('✅ POS Store initialized with offline-first mode');
-    } catch (error) {
-      console.error('❌ Failed to initialize POS Store:', error);
-      set({ error: 'Failed to initialize database' });
-    }
+    get().updateSyncStatus();
   },
 
   addItem: (product, quantity = 1) => {
@@ -93,7 +90,6 @@ export const usePosStore = create((set, get) => ({
     const subtotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     try {
-      // Try API first, fallback to local calculation
       try {
         const taxData = await posService.calculateTax(subtotal);
         set({
@@ -124,14 +120,13 @@ export const usePosStore = create((set, get) => ({
     set({ paymentMethod: method });
   },
 
-  // OPTIMISTIC WRITE: Save to local DB first, then sync to server
+  // Create transaction with offline support
   createTransaction: async () => {
     set({ isLoading: true, error: null });
     try {
       const state = get();
       const now = new Date().toISOString();
       
-      // Create transaction object
       const transaction = {
         transactionId: `txn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         items: state.cart.map((item) => ({
@@ -149,30 +144,9 @@ export const usePosStore = create((set, get) => ({
         updatedAt: now,
       };
 
-      // STEP 1: Save to local database immediately (if available)
-      if (db && db.saveTransaction) {
-        await db.saveTransaction(transaction);
-        console.log('💾 Transaction saved locally:', transaction.transactionId);
-
-        // STEP 2: Update local stock immediately
-        for (const item of transaction.items) {
-          await db.updateProductStock(item.productId, item.quantity);
-        }
-
-        // STEP 3: Try to sync to server in background
-        const isConnected = await sync.checkConnectivity();
-        
-        if (isConnected) {
-          // Fire-and-forget sync (don't wait for response)
-          sync.syncPendingTransactions().catch(err => {
-            console.error('Background sync failed:', err);
-          });
-        } else {
-          console.log('📡 Offline: Transaction queued for sync');
-        }
-      } else {
-        // Web fallback: save to localStorage
-        console.log('🌐 Web mode: saving to localStorage');
+      if (isWeb) {
+        // Web: save to localStorage
+        console.log('🌐 Saving to localStorage');
         const existingTransactions = JSON.parse(
           localStorage.getItem('pos_transactions') || '[]'
         );
@@ -180,13 +154,18 @@ export const usePosStore = create((set, get) => ({
           'pos_transactions',
           JSON.stringify([transaction, ...existingTransactions])
         );
+      } else {
+        // Native: save to SQLite
+        console.log('💾 Saving to SQLite');
+        const { saveTransaction, updateProductStock } = await import('../db/index');
+        await saveTransaction(transaction);
+        for (const item of transaction.items) {
+          await updateProductStock(item.productId, item.quantity);
+        }
       }
 
-      // Clear cart and update UI immediately
       get().clearCart();
       set({ isLoading: false });
-      
-      // Update sync status
       get().updateSyncStatus();
       
       return transaction;
@@ -200,14 +179,14 @@ export const usePosStore = create((set, get) => ({
   // Get local transactions
   getLocalTransactions: async (limit = 50, offset = 0) => {
     try {
-      if (db && db.getLocalTransactions) {
-        return await db.getLocalTransactions(limit, offset);
-      } else {
-        // Web fallback
+      if (isWeb) {
         const transactions = JSON.parse(
           localStorage.getItem('pos_transactions') || '[]'
         );
         return transactions.slice(offset, offset + limit);
+      } else {
+        const { getLocalTransactions } = await import('../db');
+        return await getLocalTransactions(limit, offset);
       }
     } catch (error) {
       console.error('Failed to get local transactions:', error);
@@ -218,11 +197,7 @@ export const usePosStore = create((set, get) => ({
   // Update sync status
   updateSyncStatus: async () => {
     try {
-      if (sync && sync.getSyncStatus) {
-        const status = await sync.getSyncStatus();
-        set({ syncStatus: status });
-      } else {
-        // Web fallback: just check if we have pending items
+      if (isWeb) {
         const transactions = JSON.parse(
           localStorage.getItem('pos_transactions') || '[]'
         );
@@ -234,6 +209,10 @@ export const usePosStore = create((set, get) => ({
             failed: 0,
           }
         });
+      } else {
+        const { getSyncStatus } = await import('../db');
+        const status = await getSyncStatus();
+        set({ syncStatus: status });
       }
     } catch (error) {
       console.error('Failed to update sync status:', error);
@@ -244,13 +223,14 @@ export const usePosStore = create((set, get) => ({
   triggerSync: async () => {
     set({ isLoading: true });
     try {
-      if (sync && sync.triggerManualSync) {
-        const result = await sync.triggerManualSync();
-        get().updateSyncStatus();
-        return result;
-      } else {
+      if (isWeb) {
         console.log('🌐 Web mode: sync not available');
         return { transactions: { synced: 0, failed: 0 }, queue: { processed: 0, failed: 0 }, stats: {} };
+      } else {
+        const { triggerManualSync } = await import('../db');
+        const result = await triggerManualSync();
+        get().updateSyncStatus();
+        return result;
       }
     } catch (error) {
       console.error('Manual sync failed:', error);
