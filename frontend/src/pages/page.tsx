@@ -862,8 +862,9 @@ export default function POSPage() {
                 </div>
                 <button
                   onClick={() => clearCart()}
-                  className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                  className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 flex items-center justify-center gap-2"
                 >
+                  <Trash2 size={18} />
                   Clear Cart
                 </button>
                 <button
