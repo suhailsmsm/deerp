@@ -11,11 +11,11 @@ export default function SalesDashboard({ transactions = [], products = [] }) {
     const now = new Date();
     const timeFilters = {
       today: (d) => new Date(d).toDateString() === now.toDateString(),
-      7days: (d) => {
+      '7days': (d) => {
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         return new Date(d) >= weekAgo;
       },
-      30days: (d) => {
+      '30days': (d) => {
         const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
         return new Date(d) >= monthAgo;
       },
