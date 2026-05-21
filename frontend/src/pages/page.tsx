@@ -852,7 +852,7 @@ export default function POSPage() {
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <div className="relative">
-                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 z-10 pointer-events-none" />
                   <input
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -919,32 +919,33 @@ export default function POSPage() {
 
               <div className="flex-1 flex flex-col gap-4 min-h-0 overflow-hidden">
                 <div className="bg-white rounded-[1.5rem] ring-1 ring-slate-200/70 p-3 overflow-auto flex-1 min-h-0 shadow-sm">
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     {filteredProducts.map((product) => {
                       const ProductIcon = product.icon || categoryIcons[product.category] || Package;
                       return (
-                        <div
+                        <button
                           key={product.id}
-                          className="rounded-xl border border-slate-200/80 bg-white p-3 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg flex flex-col items-center text-center"
+                          type="button"
+                          onClick={() => addToCart({ ...product, name: getProductDisplayName(product) })}
+                          className="rounded-xl border border-slate-200/80 bg-white p-2.5 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg flex flex-row items-start text-left"
                         >
-                          <button type="button" onClick={() => addToCart({ ...product, name: getProductDisplayName(product) })} className="w-full flex flex-col items-center">
-                            <div className="h-20 w-20 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden shadow-sm mb-3 flex items-center justify-center relative" style={{ minWidth: '80px', minHeight: '80px' }}>
-                              <ProductIcon size={40} className="text-slate-400" />
-                              {product.image && (
-                                <img
-                                  src={product.image}
-                                  alt={getProductDisplayName(product)}
-                                  loading="lazy"
-                                  className="absolute inset-0 h-full w-full object-cover rounded-xl"
-                                  onError={(e) => e.currentTarget.remove()}
-                                />
-                              )}
-                            </div>
-                            <p className="font-semibold text-sm text-slate-950 line-clamp-2 mb-1">{getProductDisplayName(product)}</p>
-                            <p className="text-base font-bold text-slate-900">AED {product.price.toFixed(2)}</p>
-                            <p className="mt-1 text-xs text-slate-500">{product.category}</p>
-                          </button>
-                        </div>
+                          <div className="h-16 w-16 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden shadow-sm flex items-center justify-center relative">
+                            <ProductIcon size={28} className="text-slate-400" />
+                            {product.image && (
+                              <img
+                                src={product.image}
+                                alt={getProductDisplayName(product)}
+                                loading="lazy"
+                                className="absolute inset-0 h-full w-full object-cover rounded-xl"
+                                onError={(e) => e.currentTarget.remove()}
+                              />
+                            )}
+                          </div>
+                          <div className="ml-2.5 flex-1 min-w-0">
+                            <p className="font-semibold text-sm text-slate-950 line-clamp-2 leading-tight mb-1">{getProductDisplayName(product)}</p>
+                            <p className="text-sm font-bold text-slate-900">AED {product.price.toFixed(2)}</p>
+                          </div>
+                        </button>
                       );
                     })}
                   </div>

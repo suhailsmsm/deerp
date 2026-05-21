@@ -69,6 +69,7 @@ export function ProductsScreen({ navigation }) {
 
   const renderProduct = ({ item }) => (
     <View style={styles.productCard}>
+      {/* Left: Image */}
       {item.image ? (
         <Image source={{ uri: item.image }} style={styles.productImage} />
       ) : (
@@ -77,26 +78,22 @@ export function ProductsScreen({ navigation }) {
         </View>
       )}
 
+      {/* Right: Name, Price stacked */}
       <View style={styles.productInfo}>
-        <Text style={styles.productName}>{item.name}</Text>
+        <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
         <Text style={styles.productPrice}>AED {item.price.toFixed(2)}</Text>
-        <Text style={[
-          styles.productStock,
-          { color: item.stock > 10 ? '#4caf50' : '#ff9800' }
-        ]}>
-          Stock: {item.stock}
-        </Text>
       </View>
 
+      {/* Small add button at top-right */}
       <TouchableOpacity
         style={[
-          styles.addButton,
+          styles.addButtonSmall,
           { opacity: item.stock > 0 ? 1 : 0.5 }
         ]}
         onPress={() => handleAddToCart(item)}
         disabled={item.stock <= 0}
       >
-        <Text style={styles.addButtonText}>+</Text>
+        <Text style={styles.addButtonSmallText}>+</Text>
       </TouchableOpacity>
     </View>
   );
@@ -138,7 +135,8 @@ export function ProductsScreen({ navigation }) {
         </ScrollView>
 
         {Platform.OS === 'web' ? (
-          <View style={[styles.searchGlass, styles.searchGlassWeb, {marginTop:8}]}>
+          <View style={[styles.searchGlass, styles.searchGlassWeb, {marginTop:8, flexDirection:'row', alignItems:'center'}]}>
+            <Text style={{color:'#ffffff', fontSize:16, marginLeft:4, marginRight:6}}>🔍</Text>
             <TextInput
               style={styles.searchInput}
               placeholder="Search products..."
@@ -148,7 +146,8 @@ export function ProductsScreen({ navigation }) {
             />
           </View>
         ) : (
-          <BlurView intensity={80} tint="light" style={[styles.searchGlass, {marginTop:8}]}>
+          <View style={[styles.searchGlass, {marginTop:8, flexDirection:'row', alignItems:'center'}]}>
+            <Text style={{color:'#ffffff', fontSize:16, marginLeft:4, marginRight:6}}>🔍</Text>
             <TextInput
               style={styles.searchInput}
               placeholder="Search products..."
@@ -156,7 +155,7 @@ export function ProductsScreen({ navigation }) {
               onChangeText={handleSearch}
               placeholderTextColor="#6b7280"
             />
-          </BlurView>
+          </View>
         )}
       </View>
 
@@ -167,6 +166,8 @@ export function ProductsScreen({ navigation }) {
           data={products}
           renderItem={renderProduct}
           keyExtractor={(item) => item.id.toString()}
+          numColumns={2}
+          columnWrapperStyle={styles.columnWrapper}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />
@@ -205,10 +206,11 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     borderColor: 'transparent',
     borderRadius: 8,
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 6,
     fontSize: 16,
     color: '#fff',
+    flex: 1,
   },
   loader: {
     flex: 1,
@@ -217,6 +219,7 @@ const styles = StyleSheet.create({
   listContent: {
     padding: 8,
     paddingBottom: 80,
+    paddingHorizontal: 8,
   },
   sectionBar: {
     paddingHorizontal: 16,
@@ -256,11 +259,10 @@ const styles = StyleSheet.create({
   productCard: {
     backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 14,
-    padding: 14,
+    padding: 10,
     marginBottom: 10,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.12)',
     shadowColor: '#000',
@@ -268,20 +270,28 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 8,
+    flex: 1,
+    marginHorizontal: 4,
+    position: 'relative',
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
   },
   productInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 10,
+    justifyContent: 'flex-start',
   },
   productImage: {
-    width: 64,
-    height: 64,
+    width: 60,
+    height: 60,
     borderRadius: 10,
     backgroundColor: '#f3f4f6',
   },
   productImagePlaceholder: {
-    width: 64,
-    height: 64,
+    width: 60,
+    height: 60,
     borderRadius: 10,
     backgroundColor: 'rgba(37,99,235,0.2)',
     justifyContent: 'center',
@@ -293,44 +303,38 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   productName: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '700',
     color: '#fff',
     marginBottom: 4,
-  },
-  productNameAr: {
-    fontSize: 13,
-    color: '#6b7280',
-    marginBottom: 6,
+    flexShrink: 1,
   },
   productPrice: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '800',
     color: '#3b82f6',
-    marginBottom: 6,
   },
-  productStock: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#a1a1aa',
-  },
-  addButton: {
+  addButtonSmall: {
     backgroundColor: '#2563eb',
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'absolute',
+    top: 8,
+    right: 8,
     shadowColor: '#2563eb',
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
-    shadowRadius: 12,
+    shadowRadius: 8,
     elevation: 6,
   },
-  addButtonText: {
+  addButtonSmallText: {
     color: '#fff',
-    fontSize: 26,
+    fontSize: 16,
     fontWeight: '800',
+    lineHeight: 18,
   },
   cartButton: {
     position: 'absolute',
@@ -398,10 +402,10 @@ const styles = StyleSheet.create({
   searchGlass: {
     borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    padding: 8,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    paddingLeft: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   logo: {
     width: 36,
