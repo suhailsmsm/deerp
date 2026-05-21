@@ -17,6 +17,7 @@ import { BlurView } from 'expo-blur';
 import { posService } from '../../services/api';
 import { usePosStore } from '../../store/posStore';
 import { Ionicons } from '@expo/vector-icons';
+import NetworkStatus from '../../components/NetworkStatus';
 
 export function ProductsScreen({ navigation }) {
   const [products, setProducts] = useState([]);
@@ -111,6 +112,9 @@ export function ProductsScreen({ navigation }) {
         </View>
 
         <View style={styles.logoDivider} />
+        
+        {/* Network Status Indicator */}
+        <NetworkStatus />
       </View>
 
       <View style={styles.sectionBar}>
