@@ -1,9 +1,10 @@
 import React from 'react';
 import { useModuleStore } from '../store/moduleStore';
-import { 
+import {
   BarChart3, BookOpen, Building2, CreditCard, Gift, LayoutDashboard, ListTodo,
-  MessageCircle, Package, Settings, ShieldCheck, ShoppingCart, Truck, 
-  UserCheck, Users, Utensils, WalletCards, Landmark, Briefcase, BrainCircuit
+  MessageCircle, Package, Settings, ShieldCheck, ShoppingCart, Truck,
+  UserCheck, Users, Utensils, WalletCards, Landmark, Briefcase, BrainCircuit,
+  HardHat, Scan, Printer
 } from 'lucide-react';
 
 export default function Sidebar({ activePage, onPageChange }) {
@@ -11,24 +12,17 @@ export default function Sidebar({ activePage, onPageChange }) {
 
   const groups = [
     {
-      label: 'Operations',
+      label: 'Management',
       items: [
         { id: 'pos', label: 'Point of Sale', icon: ShoppingCart, enabled: true },
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, enabled: true },
         { id: 'ai-insights', label: 'AI Features', icon: BrainCircuit, enabled: modules.ai },
-        { id: 'payments', label: 'Payments', icon: CreditCard, enabled: true },
-        { id: 'communications', label: 'Comms & Delivery', icon: MessageCircle, enabled: modules.whatsapp },
-      ]
-    },
-    {
-      label: 'Management',
-      items: [
-        { id: 'advanced-inventory', label: 'Inventory', icon: Package, enabled: modules.inventory },
-        { id: 'procurement', label: 'Procurement', icon: Truck, enabled: true },
+        { id: 'inventory', label: 'Inventory Tracker', icon: Package, enabled: modules.inventory },
         { id: 'crm', label: 'CRM', icon: Users, enabled: modules.crm },
         { id: 'loyalty', label: 'Loyalty & Promos', icon: Gift, enabled: modules.loyalty },
-        { id: 'projects', label: 'Projects & Services', icon: Briefcase, enabled: true },
-        { id: 'reports', label: 'Reports', icon: BarChart3, enabled: true },
+        { id: 'reports', label: 'Sales Reports', icon: BarChart3, enabled: true },
+        { id: 'staff', label: 'Staff Management', icon: ShieldCheck, enabled: true },
+        { id: 'hardware', label: 'Hardware Devices', icon: Printer, enabled: true },
       ]
     },
     {

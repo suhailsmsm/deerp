@@ -22,6 +22,16 @@ const Projects = React.lazy(() => import('./Projects'));
 const AIInsights = React.lazy(() => import('./AIInsights'));
 const SalesReports = React.lazy(() => import('./SalesReports'));
 
+// Import new POS components
+import DiscountPanel from '../components/pos/DiscountPanel';
+import HoldOrdersPanel from '../components/pos/HoldOrdersPanel';
+import PaymentPanel from '../components/pos/PaymentPanel';
+import InventoryTracker from '../components/pos/InventoryTracker';
+import SalesDashboard from '../components/pos/SalesDashboard';
+import StaffManagement from '../components/pos/StaffManagement';
+import HardwareIntegration from '../components/pos/HardwareIntegration';
+import { printReceipt, shareReceiptViaWhatsApp, sendReceiptViaSMS } from '../utils/receiptGenerator';
+
 // Loading fallback component
 const ModuleLoadingFallback = () => (
   <div className="flex items-center justify-center h-96 bg-gray-50 dark:bg-gray-900 rounded-lg">
@@ -715,31 +725,20 @@ export default function POSPage() {
 
         {activePage === 'reports' && (
           <Suspense fallback={<ModuleLoadingFallback />}>
-            <SalesReports products={products} />
+            <SalesDashboard transactions={[]} products={products} />
           </Suspense>
         )}
 
         {activePage === 'staff' && (
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold">Staff & Shifts</h1>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-6 bg-white rounded-2xl border border-slate-200">
-                <h2 className="text-lg font-semibold text-slate-900">Ahmed K.</h2>
-                <p className="text-sm text-slate-500">Manager</p>
-                <div className="mt-4 text-sm font-bold text-slate-700">On Shift</div>
-              </div>
-              <div className="p-6 bg-white rounded-2xl border border-slate-200">
-                <h2 className="text-lg font-semibold text-slate-900">Lina M.</h2>
-                <p className="text-sm text-slate-500">Cashier</p>
-                <div className="mt-4 text-sm font-bold text-slate-700">Off Duty</div>
-              </div>
-              <div className="p-6 bg-white rounded-2xl border border-slate-200">
-                <h2 className="text-lg font-semibold text-slate-900">Yousef S.</h2>
-                <p className="text-sm text-slate-500">Chef</p>
-                <div className="mt-4 text-sm font-bold text-slate-700">On Break</div>
-              </div>
-            </div>
-          </div>
+          <StaffManagement staff={[]} onStaffUpdate={() => {}} />
+        )}
+
+        {activePage === 'inventory' && (
+          <InventoryTracker products={products} onProductUpdate={() => {}} />
+        )}
+
+        {activePage === 'hardware' && (
+          <HardwareIntegration />
         )}
 
         {activePage === 'fnb' && (
