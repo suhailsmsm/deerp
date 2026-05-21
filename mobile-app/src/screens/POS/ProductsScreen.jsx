@@ -111,8 +111,6 @@ export function ProductsScreen({ navigation }) {
         </View>
 
         <View style={styles.logoDivider} />
-
-        <Text style={styles.sectionTitle}>Products</Text>
       </View>
 
       <View style={styles.sectionBar}>
