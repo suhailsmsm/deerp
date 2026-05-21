@@ -6,6 +6,31 @@ export default function SalesDashboard({ transactions = [], products = [] }) {
   const [timeRange, setTimeRange] = useState('7days'); // today, 7days, 30days, custom
   const [exportFormat, setExportFormat] = useState('pdf'); // pdf, excel, csv
 
+  // Demo transactions for visualization (remove when real data is available)
+  const demoTransactions = useMemo(() => {
+    const demo = [];
+    const today = new Date();
+    for (let i = 0; i < 30; i++) {
+      const date = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+      const numTransactions = Math.floor(Math.random() * 20) + 10;
+      for (let j = 0; j < numTransactions; j++) {
+        demo.push({
+          id: `DEMO-${date.toISOString().split('T')[0]}-${j}`,
+          createdAt: date.toISOString(),
+          total: Math.random() * 500 + 50,
+          paymentMethod: ['cash', 'card', 'apple_pay', 'google_pay', 'tabby'][Math.floor(Math.random() * 5)],
+          items: JSON.stringify([
+            { name: 'Arabic Coffee', qty: Math.floor(Math.random() * 5) + 1, price: 45 },
+            { name: 'Fresh Milk', qty: Math.floor(Math.random() * 3) + 1, price: 12.5 },
+          ]),
+        });
+      }
+    }
+    return demo;
+  }, []);
+
+  const allTransactions = transactions.length > 0 ? transactions : demoTransactions;
+
   // Process transactions for analytics
   const analytics = useMemo(() => {
     const now = new Date();
@@ -22,7 +47,7 @@ export default function SalesDashboard({ transactions = [], products = [] }) {
     };
 
     const filter = timeFilters[timeRange] || timeFilters.today;
-    const filtered = transactions.filter(t => filter(t.createdAt));
+    const filtered = allTransactions.filter(t => filter(t.createdAt));
 
     const totalSales = filtered.reduce((sum, t) => sum + (t.total || 0), 0);
     const totalTransactions = filtered.length;
@@ -59,7 +84,7 @@ export default function SalesDashboard({ transactions = [], products = [] }) {
       dailySales,
       productSales,
     };
-  }, [transactions, timeRange]);
+  }, [allTransactions, timeRange]);
 
   // Chart data
   const dailyChartData = Object.entries(analytics.dailySales).map(([date, amount]) => ({
