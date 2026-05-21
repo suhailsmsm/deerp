@@ -94,23 +94,60 @@ export const usePosStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const state = get();
-      const transaction = await posService.createTransaction({
-        items: state.cart.map((item) => ({
-          productId: item.id,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-        subtotal: state.subtotal,
-        vat: state.vat,
-        total: state.total,
-        discount: state.discount,
-        method: state.paymentMethod,
-      });
+      
+      // Try to save to API first
+      try {
+        const transaction = await posService.createTransaction({
+          items: state.cart.map((item) => ({
+            productId: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          subtotal: state.subtotal,
+          vat: state.vat,
+          total: state.total,
+          discount: state.discount,
+          method: state.paymentMethod,
+        });
 
-      get().clearCart();
-      set({ isLoading: false });
-      return transaction;
+        get().clearCart();
+        set({ isLoading: false });
+        return transaction;
+      } catch (apiError) {
+        // Fallback: Save to localStorage if API fails
+        console.warn('API unavailable, saving to localStorage:', apiError.message);
+        
+        const localTransaction = {
+          id: `local-${Date.now()}`,
+          items: state.cart.map((item) => ({
+            productId: item.id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          subtotal: state.subtotal,
+          vat: state.vat,
+          total: state.total,
+          discount: state.discount,
+          method: state.paymentMethod,
+          createdAt: new Date().toISOString(),
+          synced: false,
+        };
+
+        // Save to localStorage
+        const existingTransactions = JSON.parse(
+          localStorage.getItem('pos_transactions') || '[]'
+        );
+        localStorage.setItem(
+          'pos_transactions',
+          JSON.stringify([localTransaction, ...existingTransactions])
+        );
+
+        get().clearCart();
+        set({ isLoading: false });
+        return localTransaction;
+      }
     } catch (error) {
       const errorMessage = error.response?.data?.error || error.message || 'Transaction failed';
       set({ error: errorMessage, isLoading: false });

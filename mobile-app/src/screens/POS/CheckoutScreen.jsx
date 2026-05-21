@@ -30,13 +30,22 @@ export function CheckoutScreen({ navigation }) {
   ];
 
   const handlePayment = async () => {
+    if (!cart || cart.length === 0) {
+      Alert.alert('Cart Empty', 'Please add items to cart before checkout');
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const transaction = await createTransaction();
 
+      const isLocal = transaction.id?.startsWith('local-');
+      
       Alert.alert(
-        'Payment Successful',
-        `Transaction ID: ${transaction.id}\nAmount: AED ${transaction.total.toFixed(2)}`,
+        '✅ Payment Successful',
+        isLocal
+          ? `Transaction saved locally\nID: ${transaction.id}\nAmount: AED ${transaction.total.toFixed(2)}\n\n⚠️ Will sync when online`
+          : `Transaction ID: ${transaction.id}\nAmount: AED ${transaction.total.toFixed(2)}`,
         [
           {
             text: 'View Receipt',
@@ -45,7 +54,7 @@ export function CheckoutScreen({ navigation }) {
             },
           },
           {
-            text: 'New Transaction',
+            text: 'New Order',
             onPress: () => {
               navigation.navigate('Products');
             },
@@ -53,7 +62,10 @@ export function CheckoutScreen({ navigation }) {
         ]
       );
     } catch (error) {
-      Alert.alert('Payment Failed', error.message || 'Failed to process payment');
+      Alert.alert(
+        '❌ Payment Failed',
+        error.message || 'Failed to process payment. Please try again.'
+      );
     } finally {
       setIsProcessing(false);
     }
