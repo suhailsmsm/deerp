@@ -128,6 +128,7 @@ export const usePosStore = create((set, get) => ({
       const now = new Date().toISOString();
       
       const transaction = {
+        id: `txn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         transactionId: `txn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         items: state.cart.map((item) => ({
           productId: item.id,
@@ -154,6 +155,7 @@ export const usePosStore = create((set, get) => ({
           'pos_transactions',
           JSON.stringify([transaction, ...existingTransactions])
         );
+        console.log('✅ Transaction saved:', transaction.id);
       } else {
         // Native: save to SQLite
         console.log('💾 Saving to SQLite');
@@ -162,6 +164,7 @@ export const usePosStore = create((set, get) => ({
         for (const item of transaction.items) {
           await updateProductStock(item.productId, item.quantity);
         }
+        console.log('✅ Transaction saved:', transaction.id);
       }
 
       get().clearCart();

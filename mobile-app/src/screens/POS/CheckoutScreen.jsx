@@ -37,15 +37,13 @@ export function CheckoutScreen({ navigation }) {
 
     setIsProcessing(true);
     try {
+      console.log('🔄 Processing payment...');
       const transaction = await createTransaction();
+      console.log('✅ Transaction created:', transaction);
 
-      const isLocal = transaction.id?.startsWith('local-');
-      
       Alert.alert(
-        '✅ Payment Successful',
-        isLocal
-          ? `Transaction saved locally\nID: ${transaction.id}\nAmount: AED ${transaction.total.toFixed(2)}\n\n⚠️ Will sync when online`
-          : `Transaction ID: ${transaction.id}\nAmount: AED ${transaction.total.toFixed(2)}`,
+        '✅ Payment Successful!',
+        `Order ID: ${transaction.id}\nAmount: AED ${transaction.total.toFixed(2)}\nMethod: ${paymentMethod.toUpperCase()}`,
         [
           {
             text: 'View Receipt',
@@ -62,6 +60,7 @@ export function CheckoutScreen({ navigation }) {
         ]
       );
     } catch (error) {
+      console.error('❌ Payment failed:', error);
       Alert.alert(
         '❌ Payment Failed',
         error.message || 'Failed to process payment. Please try again.'
