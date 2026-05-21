@@ -17,6 +17,7 @@ import CrmScreen from './src/screens/CRM/CrmScreen';
 import { CustomerDetailScreen } from './src/screens/CRM/CustomerDetailScreen';
 import { CreateOrderScreen } from './src/screens/CRM/CreateOrderScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import { SalesScreen } from './src/screens/Sales/SalesScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -103,6 +104,30 @@ function SettingsStack() {
   );
 }
 
+function SalesStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+        headerStyle: { backgroundColor: '#0f172a', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)' },
+        headerTitleStyle: { fontSize: 18, fontWeight: '700', color: '#fff' },
+        headerTintColor: '#3b82f6',
+      }}
+    >
+      <Stack.Screen
+        name="SalesHistory"
+        component={SalesScreen}
+        options={{ title: 'Sales History' }}
+      />
+      <Stack.Screen
+        name="Receipt"
+        component={ReceiptScreen}
+        options={{ title: 'Receipt' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function MainApp() {
   return (
     <Tab.Navigator
@@ -133,6 +158,16 @@ function MainApp() {
           tabBarLabel: 'CRM',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people-outline" size={20} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="SalesTab"
+        component={SalesStack}
+        options={{
+          tabBarLabel: 'Sales',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="receipt-outline" size={20} color={color} />
           ),
         }}
       />
