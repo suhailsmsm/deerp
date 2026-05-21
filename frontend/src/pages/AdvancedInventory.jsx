@@ -1,5 +1,6 @@
+
 import React, { useMemo, useState, useEffect } from 'react';
-import { Package, AlertTriangle, Search, Plus, Save, X, Pencil, Camera } from 'lucide-react';
+import { Package, AlertTriangle, Search, Plus, Save, X, Pencil, Camera, Upload, Download, Trash2 } from 'lucide-react';
 
 const loadInventoryFromStorage = () => {
   try {
@@ -34,9 +35,35 @@ export default function AdvancedInventory({ onInventoryUpdate }) {
         setInventoryData(products.map(p => ({
           ...p,
           sku: p.barcode,
-          expiry: p.expiryDate ? new Date(p.expiryDate).toISOString().split('T')[0] : '', // Format for date input
-          value: p.price * p.stock // Calculate value for display
+          expiry: p.expiryDate ? new Date(p.expiryDate).toISOString().split('T')[0] : '',
+          value: p.price * p.stock
         })));
+      } else {
+        // Browser mode: load from localStorage or use demo data
+        const stored = loadInventoryFromStorage();
+        if (stored && stored.length > 0) {
+          setInventoryData(stored);
+        } else {
+          // Try loading from derp_products (POS page stores this)
+          const posStored = localStorage.getItem('derp_products');
+          if (posStored) {
+            try {
+              const posProducts = JSON.parse(posStored);
+              setInventoryData(posProducts.map(p => ({
+                ...p,
+                sku: p.barcode || p.sku || '',
+                expiry: p.expiryDate ? new Date(p.expiryDate).toISOString().split('T')[0] : '',
+                value: p.price * p.stock,
+                minStock: p.minStock || 10,
+                maxStock: p.maxStock || 100,
+                batch: p.batch || '',
+                warehouse: p.warehouse || 'Main',
+              })));
+            } catch (e) {
+              console.error('Failed to parse pos products:', e);
+            }
+          }
+        }
       }
     };
     fetchProducts();
@@ -48,7 +75,110 @@ export default function AdvancedInventory({ onInventoryUpdate }) {
       onInventoryUpdate(inventoryData);
     }
   }, [inventoryData, onInventoryUpdate]);
+  
   const [draft, setDraft] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showBulkImport, setShowBulkImport] = useState(false);
+  const [bulkImportData, setBulkImportData] = useState('');
+  const [importFile, setImportFile] = useState(null);
+
+  const openAddModal = () => {
+    setDraft({
+      id: Date.now(),
+      name: '',
+      sku: '',
+      barcode: '',
+      stock: 0,
+      minStock: 10,
+      maxStock: 100,
+      price: 0,
+      image: '',
+      expiry: '',
+      batch: '',
+      warehouse: 'Main',
+    });
+    setShowAddModal(true);
+  };
+
+  const closeAddModal = () => {
+    setShowAddModal(false);
+    setDraft(null);
+  };
+
+  const saveNewItem = () => {
+    if (!draft || !draft.name || !draft.sku) {
+      alert('Please fill in required fields (Name and SKU)');
+      return;
+    }
+    setInventoryData([...inventoryData, draft]);
+    closeAddModal();
+  };
+
+  const handleBulkImport = () => {
+    try {
+      const items = JSON.parse(bulkImportData);
+      if (!Array.isArray(items)) {
+        alert('Invalid format. Please provide a JSON array of items.');
+        return;
+      }
+      const newItems = items.map((item, index) => ({
+        ...item,
+        id: item.id || Date.now() + index,
+        sku: item.sku || item.barcode || '',
+        stock: item.stock || 0,
+        minStock: item.minStock || 10,
+        maxStock: item.maxStock || 100,
+        price: item.price || 0,
+      }));
+      setInventoryData([...inventoryData, ...newItems]);
+      setShowBulkImport(false);
+      setBulkImportData('');
+      alert(`Successfully imported ${newItems.length} items!`);
+    } catch (e) {
+      alert('Invalid JSON format. Please check your data.');
+    }
+  };
+
+  const handleFileImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const items = JSON.parse(event.target.result);
+        if (!Array.isArray(items)) {
+          alert('Invalid format. Please provide a JSON array of items.');
+          return;
+        }
+        const newItems = items.map((item, index) => ({
+          ...item,
+          id: item.id || Date.now() + index,
+          sku: item.sku || item.barcode || '',
+          stock: item.stock || 0,
+          minStock: item.minStock || 10,
+          maxStock: item.maxStock || 100,
+          price: item.price || 0,
+        }));
+        setInventoryData([...inventoryData, ...newItems]);
+        alert(`Successfully imported ${newItems.length} items!`);
+      } catch (err) {
+        alert('Invalid file format. Please upload a valid JSON file.');
+      }
+    };
+    reader.readAsText(file);
+    setImportFile(null);
+  };
+
+  const handleExport = () => {
+    const dataStr = JSON.stringify(inventoryData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `inventory-export-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   const handleImageUpload = (file) => {
     if (!file || !draft) return;
@@ -143,9 +273,29 @@ export default function AdvancedInventory({ onInventoryUpdate }) {
           <h1 className="text-3xl font-bold">Advanced Inventory Management</h1>
           <p className="text-slate-500 mt-1">Track stock, expiry dates, warehouses, and batches across your business.</p>
         </div>
-        <button className="px-6 py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700" type="button">
-          <Plus className="inline mr-2" size={18} /> Add New Item
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button 
+            onClick={handleExport}
+            className="px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50 flex items-center gap-2" 
+            type="button"
+          >
+            <Download size={18} /> Export
+          </button>
+          <button 
+            onClick={() => setShowBulkImport(true)}
+            className="px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50 flex items-center gap-2" 
+            type="button"
+          >
+            <Upload size={18} /> Bulk Import
+          </button>
+          <button 
+            onClick={openAddModal}
+            className="px-6 py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700 flex items-center gap-2" 
+            type="button"
+          >
+            <Plus size={18} /> Add New Item
+          </button>
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -193,7 +343,7 @@ export default function AdvancedInventory({ onInventoryUpdate }) {
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
           <div className="p-6 border-b border-slate-200">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 z-10 pointer-events-none" size={18} />
               <input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -242,9 +392,9 @@ export default function AdvancedInventory({ onInventoryUpdate }) {
                           {item.stock} / {item.maxStock}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-slate-600">{item.batch}</td>
-                      <td className="px-6 py-4 text-slate-600">{new Date(item.expiry).toLocaleDateString()}</td>
-                      <td className="px-6 py-4 text-slate-600">{item.warehouse}</td>
+                      <td className="px-6 py-4 text-slate-600">{item.batch || '-'}</td>
+                      <td className="px-6 py-4 text-slate-600">{item.expiry ? new Date(item.expiry).toLocaleDateString() : '-'}</td>
+                      <td className="px-6 py-4 text-slate-600">{item.warehouse || '-'}</td>
                       <td className="px-6 py-4 font-semibold">AED {item.value}</td>
                       <td className="px-6 py-4 text-right">
                         <button
@@ -542,6 +692,221 @@ export default function AdvancedInventory({ onInventoryUpdate }) {
               >
                 <Save size={16} />
                 Save changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add New Item Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-slate-950">Add New Item</h2>
+              <button onClick={closeAddModal} className="rounded-2xl p-2 hover:bg-slate-100">
+                <X size={20} className="text-slate-500" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Product Name *</label>
+                  <input
+                    type="text"
+                    value={draft.name}
+                    onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                    placeholder="e.g., Arabic Coffee"
+                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">SKU / Barcode *</label>
+                  <input
+                    type="text"
+                    value={draft.sku}
+                    onChange={(e) => setDraft({ ...draft, sku: e.target.value })}
+                    placeholder="e.g., DEM-1001"
+                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Stock Quantity</label>
+                  <input
+                    type="number"
+                    value={draft.stock}
+                    onChange={(e) => setDraft({ ...draft, stock: Number(e.target.value) || 0 })}
+                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Price (AED)</label>
+                  <input
+                    type="number"
+                    value={draft.price}
+                    onChange={(e) => setDraft({ ...draft, price: Number(e.target.value) || 0 })}
+                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Min Stock Level</label>
+                  <input
+                    type="number"
+                    value={draft.minStock}
+                    onChange={(e) => setDraft({ ...draft, minStock: Number(e.target.value) || 0 })}
+                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Max Stock Level</label>
+                  <input
+                    type="number"
+                    value={draft.maxStock}
+                    onChange={(e) => setDraft({ ...draft, maxStock: Number(e.target.value) || 0 })}
+                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Batch Number</label>
+                  <input
+                    type="text"
+                    value={draft.batch}
+                    onChange={(e) => setDraft({ ...draft, batch: e.target.value })}
+                    placeholder="e.g., BATCH-2026-001"
+                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Warehouse</label>
+                  <input
+                    type="text"
+                    value={draft.warehouse}
+                    onChange={(e) => setDraft({ ...draft, warehouse: e.target.value })}
+                    placeholder="e.g., Main Warehouse"
+                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Expiry Date</label>
+                  <input
+                    type="date"
+                    value={draft.expiry}
+                    onChange={(e) => setDraft({ ...draft, expiry: e.target.value })}
+                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Image URL</label>
+                  <input
+                    type="text"
+                    value={draft.image}
+                    onChange={(e) => setDraft({ ...draft, image: e.target.value })}
+                    placeholder="https://example.com/image.jpg"
+                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-row gap-3 border-t border-slate-200 bg-slate-50 p-4 mt-6 justify-end">
+              <button
+                type="button"
+                onClick={closeAddModal}
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={saveNewItem}
+                className="rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 inline-flex items-center gap-2 justify-center"
+              >
+                <Save size={16} />
+                Save Item
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Import Modal */}
+      {showBulkImport && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-slate-950">Bulk Import Items</h2>
+              <button onClick={() => setShowBulkImport(false)} className="rounded-2xl p-2 hover:bg-slate-100">
+                <X size={20} className="text-slate-500" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Upload JSON File</label>
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleFileImport}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-slate-500">Or paste JSON</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">JSON Data</label>
+                <textarea
+                  value={bulkImportData}
+                  onChange={(e) => setBulkImportData(e.target.value)}
+                  placeholder='[{"name": "Product 1", "sku": "SKU-001", "stock": 100, "price": 10.00}]'
+                  rows={8}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500 font-mono"
+                />
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+                <p className="text-sm text-blue-800 font-medium">Expected JSON Format:</p>
+                <pre className="mt-2 text-xs text-blue-700 overflow-x-auto bg-white rounded-xl p-3">
+{`[{
+  "name": "Product Name",
+  "sku": "SKU-001",
+  "barcode": "123456789",
+  "stock": 100,
+  "minStock": 10,
+  "maxStock": 500,
+  "price": 25.00,
+  "batch": "BATCH-001",
+  "warehouse": "Main",
+  "expiry": "2027-12-31"
+}]`}
+                </pre>
+              </div>
+            </div>
+
+            <div className="flex flex-row gap-3 border-t border-slate-200 bg-slate-50 p-4 mt-6 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowBulkImport(false)}
+                className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleBulkImport}
+                disabled={!bulkImportData.trim()}
+                className="rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 justify-center"
+              >
+                <Upload size={16} />
+                Import Items
               </button>
             </div>
           </div>

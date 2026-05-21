@@ -23,7 +23,7 @@ export default function Sidebar({ activePage, onPageChange }) {
     {
       label: 'Management',
       items: [
-        { id: 'advanced-inventory', label: 'Inventory (Advanced)', icon: Package, enabled: modules.inventory },
+        { id: 'advanced-inventory', label: 'Inventory', icon: Package, enabled: modules.inventory },
         { id: 'procurement', label: 'Procurement', icon: Truck, enabled: true },
         { id: 'crm', label: 'CRM', icon: Users, enabled: modules.crm },
         { id: 'loyalty', label: 'Loyalty & Promos', icon: Gift, enabled: modules.loyalty },

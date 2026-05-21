@@ -235,7 +235,9 @@ export default function POSPage() {
         setBranches([]);
         const stored = loadProductsFromStorage() || [];
         const base = (stored && stored.length) ? stored : demoProducts;
-        setProducts(normalizeProductsForPos(base)); // Load demo or local storage products
+        const normalized = normalizeProductsForPos(base);
+        setProducts(normalized);
+        saveProductsToStorage(normalized); // Save to localStorage for other modules
         setCustomers(demoCustomers);
       }
       setBranchLoading(false);
