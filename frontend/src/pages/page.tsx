@@ -928,21 +928,16 @@ export default function POSPage() {
                           className="rounded-xl border border-slate-200/80 bg-white p-3 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg flex flex-col items-center text-center"
                         >
                           <button type="button" onClick={() => addToCart({ ...product, name: getProductDisplayName(product) })} className="w-full flex flex-col items-center">
-                            <div className="h-20 w-20 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden shadow-sm mb-3 flex items-center justify-center" style={{ minWidth: '80px', minHeight: '80px' }}>
-                              {product.image ? (
+                            <div className="h-20 w-20 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden shadow-sm mb-3 flex items-center justify-center relative" style={{ minWidth: '80px', minHeight: '80px' }}>
+                              <ProductIcon size={40} className="text-slate-400" />
+                              {product.image && (
                                 <img
                                   src={product.image}
                                   alt={getProductDisplayName(product)}
                                   loading="lazy"
-                                  onError={(event) => {
-                                    event.currentTarget.onerror = null;
-                                    event.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2394a3b8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L11 5.5l-5.5 8.5 2 2.5zm5.5-4.91c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z"/></svg>';
-                                  }}
-                                  className="h-full w-full object-cover"
-                                  style={{ width: '100%', height: '100%' }}
+                                  className="absolute inset-0 h-full w-full object-cover rounded-xl"
+                                  onError={(e) => e.currentTarget.remove()}
                                 />
-                              ) : (
-                                <ProductIcon size={40} className="text-slate-400" />
                               )}
                             </div>
                             <p className="font-semibold text-sm text-slate-950 line-clamp-2 mb-1">{getProductDisplayName(product)}</p>
