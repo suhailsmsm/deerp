@@ -424,8 +424,8 @@ const styles = StyleSheet.create({
   },
   topBar: {
     paddingHorizontal: 16,
-    paddingTop: 18,
-    paddingBottom: 12,
+    paddingTop: 8,
+    paddingBottom: 8,
     backgroundColor: 'rgba(15,23,42,0.5)',
     alignItems: 'flex-start',
     borderBottomWidth: 1,
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
   logoRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   logoText: {
     marginLeft: 8,
