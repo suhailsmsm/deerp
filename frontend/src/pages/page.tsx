@@ -881,7 +881,7 @@ export default function POSPage() {
                       >
                         <button type="button" onClick={() => addToCart({ ...product, name: getProductDisplayName(product) })} className="w-full text-left">
                           <div className="flex items-start gap-3 min-w-0">
-                            <div className="h-14 w-14 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden shadow-sm">
+                            <div className="h-14 w-14 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden shadow-sm" style={{ minWidth: '56px', minHeight: '56px' }}>
                               {product.image ? (
                                 <img
                                   src={product.image}
@@ -892,12 +892,14 @@ export default function POSPage() {
                                     event.currentTarget.src = 'https://placehold.co/56x56/ddd/555?text=Item';
                                   }}
                                   className="h-full w-full object-cover"
+                                  style={{ width: '100%', height: '100%', maxWidth: '56px', maxHeight: '56px' }}
                                 />
                               ) : (
                                 <img
                                   src="https://placehold.co/56x56/ddd/555?text=Item"
                                   alt="Item"
                                   className="h-full w-full object-cover"
+                                  style={{ width: '100%', height: '100%', maxWidth: '56px', maxHeight: '56px' }}
                                 />
                               )}
                             </div>
