@@ -1,13 +1,13 @@
 'use client';
 import React, { useEffect, useState, Suspense } from 'react';
 import { ShoppingCart, CreditCard, Receipt, Search, Plus, Minus, Trash2, Users, Package, MessageSquare, Building2, Edit3, RotateCcw, Sun, Moon, Gift, Tag, Share2, Facebook, Instagram, Linkedin, Twitter, Globe, Send, Calendar, Hash, Image as ImageIcon, Video } from 'lucide-react';
-import { useCartStore } from './cartStore';
-import { useSessionStore } from './sessionStore';
-import { useModuleStore } from './moduleStore';
+import { useCartStore } from '../store/cartStore';
+import { useSessionStore } from '../store/sessionStore';
+import { useModuleStore } from '../store/moduleStore';
 import StaffLogin from './StaffLogin';
 import { generateReceiptHtml } from './ReceiptPreview';
-import TableMap from './TableMap';
-import Sidebar from './Sidebar';
+import TableMap from '../components/TableMap';
+import Sidebar from '../components/Sidebar';
 import SettingsAdmin from './SettingsAdmin';
 import InventoryExpiry from './InventoryExpiry';
 import ShiftReport from './Reports';

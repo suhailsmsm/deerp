@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useModuleStore } from './moduleStore';
+import { useModuleStore } from '../store/moduleStore';
 
 export default function ShiftReport({ shiftId, openingFloat }) {
   const [report, setReport] = useState(null);

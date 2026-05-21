@@ -1,5 +1,5 @@
 import React from 'react';
-import { useModuleStore } from './moduleStore';
+import { useModuleStore } from '../store/moduleStore';
 import { 
   BarChart3, BookOpen, Building2, CreditCard, Gift, LayoutDashboard, ListTodo,
   MessageCircle, Package, Settings, ShieldCheck, ShoppingCart, Truck, 

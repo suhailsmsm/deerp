@@ -1,12 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import POSPage from './page'
-import './index.css' // Make sure you have basic tailwind/css here
-import { installBrowserElectronFallback } from './browserElectronFallback'
-
-if (typeof window !== 'undefined') {
-  installBrowserElectronFallback();
-}
+import POSPage from './src/pages/page'
+import './src/index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useModuleStore } from './moduleStore';
+import { useModuleStore } from '../store/moduleStore';
 import {
   BadgePercent,
   Bot,

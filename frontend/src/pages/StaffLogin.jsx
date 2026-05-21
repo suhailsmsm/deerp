@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSessionStore } from './sessionStore';
+import { useSessionStore } from '../store/sessionStore';
 import { Lock, Delete } from 'lucide-react';
 
 export default function StaffLogin() {
