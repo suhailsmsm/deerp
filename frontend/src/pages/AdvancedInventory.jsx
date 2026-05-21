@@ -1,6 +1,8 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { Package, AlertTriangle, Search, Plus, Save, X, Pencil, Camera, Upload, Download, Trash2 } from 'lucide-react';
+import { Package, AlertTriangle, Search, Plus, Save, X, Pencil, Camera, Upload, Download, Trash2, FileSpreadsheet, FileText } from 'lucide-react';
+import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 
 const loadInventoryFromStorage = () => {
   try {
@@ -81,6 +83,7 @@ export default function AdvancedInventory({ onInventoryUpdate }) {
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [bulkImportData, setBulkImportData] = useState('');
   const [importFile, setImportFile] = useState(null);
+  const [importFormat, setImportFormat] = useState('csv'); // 'csv' or 'excel'
 
   const openAddModal = () => {
     setDraft({
@@ -142,42 +145,115 @@ export default function AdvancedInventory({ onInventoryUpdate }) {
   const handleFileImport = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const items = JSON.parse(event.target.result);
-        if (!Array.isArray(items)) {
-          alert('Invalid format. Please provide a JSON array of items.');
-          return;
+
+    if (file.name.endsWith('.csv')) {
+      // Parse CSV
+      reader.onload = (event) => {
+        try {
+          const results = Papa.parse(event.target.result, { header: true, skipEmptyLines: true });
+          if (results.data && Array.isArray(results.data)) {
+            const newItems = results.data.map((item, index) => ({
+              id: Date.now() + index,
+              name: item.Name || item.name || 'Unnamed Item',
+              sku: item.SKU || item.sku || item.Barcode || item.barcode || '',
+              barcode: item.Barcode || item.barcode || item.SKU || item.sku || '',
+              stock: Number(item.Stock || item.stock || 0),
+              minStock: Number(item.Min_Stock || item.minStock || 10),
+              maxStock: Number(item.Max_Stock || item.maxStock || 100),
+              price: Number(item.Price || item.price || 0),
+              batch: item.Batch || item.batch || '',
+              warehouse: item.Warehouse || item.warehouse || 'Main',
+              expiry: item.Expiry || item.expiry || '',
+              image: item.Image || item.image || '',
+            }));
+            setInventoryData([...inventoryData, ...newItems]);
+            alert(`Successfully imported ${newItems.length} items from CSV!`);
+            setShowBulkImport(false);
+          }
+        } catch (err) {
+          alert('Invalid CSV format. Please check your file.');
         }
-        const newItems = items.map((item, index) => ({
-          ...item,
-          id: item.id || Date.now() + index,
-          sku: item.sku || item.barcode || '',
-          stock: item.stock || 0,
-          minStock: item.minStock || 10,
-          maxStock: item.maxStock || 100,
-          price: item.price || 0,
-        }));
-        setInventoryData([...inventoryData, ...newItems]);
-        alert(`Successfully imported ${newItems.length} items!`);
-      } catch (err) {
-        alert('Invalid file format. Please upload a valid JSON file.');
-      }
-    };
-    reader.readAsText(file);
+      };
+      reader.readAsText(file);
+    } else if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+      // Parse Excel
+      reader.onload = (event) => {
+        try {
+          const data = new Uint8Array(event.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const results = XLSX.utils.sheet_to_json(firstSheet);
+          
+          if (results && Array.isArray(results)) {
+            const newItems = results.map((item, index) => ({
+              id: Date.now() + index,
+              name: item.Name || item.name || 'Unnamed Item',
+              sku: item.SKU || item.sku || item.Barcode || item.barcode || '',
+              barcode: item.Barcode || item.barcode || item.SKU || item.sku || '',
+              stock: Number(item.Stock || item.stock || 0),
+              minStock: Number(item.Min_Stock || item.minStock || 10),
+              maxStock: Number(item.Max_Stock || item.maxStock || 100),
+              price: Number(item.Price || item.price || 0),
+              batch: item.Batch || item.batch || '',
+              warehouse: item.Warehouse || item.warehouse || 'Main',
+              expiry: item.Expiry ? (typeof item.Expiry === 'number' ? new Date((item.Expiry - (25567 + 1))*86400*1000).toISOString().split('T')[0] : item.Expiry) : item.expiry || '',
+              image: item.Image || item.image || '',
+            }));
+            setInventoryData([...inventoryData, ...newItems]);
+            alert(`Successfully imported ${newItems.length} items from Excel!`);
+            setShowBulkImport(false);
+          }
+        } catch (err) {
+          console.error('Import error:', err);
+          alert('Invalid Excel format. Please check your file.');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      alert('Please upload a CSV or Excel file (.csv, .xlsx, .xls)');
+    }
     setImportFile(null);
   };
 
-  const handleExport = () => {
-    const dataStr = JSON.stringify(inventoryData, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `inventory-export-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+  const handleExport = (format = 'csv') => {
+    // Prepare data for export
+    const exportData = inventoryData.map(item => ({
+      Name: item.name,
+      SKU: item.sku || item.barcode || '',
+      Barcode: item.barcode || item.sku || '',
+      Stock: item.stock || 0,
+      Min_Stock: item.minStock || 10,
+      Max_Stock: item.maxStock || 100,
+      Price: item.price || 0,
+      Value: item.value || (item.price * item.stock) || 0,
+      Batch: item.batch || '',
+      Warehouse: item.warehouse || 'Main',
+      Expiry: item.expiry || '',
+      Image: item.image || '',
+    }));
+
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = `inventory-export-${timestamp}`;
+
+    if (format === 'csv') {
+      // Export as CSV
+      const csv = Papa.unparse(exportData);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${filename}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } else if (format === 'excel') {
+      // Export as Excel
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Inventory');
+      XLSX.writeFile(wb, `${filename}.xlsx`);
+    }
   };
 
   const handleImageUpload = (file) => {
@@ -274,13 +350,28 @@ export default function AdvancedInventory({ onInventoryUpdate }) {
           <p className="text-slate-500 mt-1">Track stock, expiry dates, warehouses, and batches across your business.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button 
-            onClick={handleExport}
-            className="px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50 flex items-center gap-2" 
-            type="button"
-          >
-            <Download size={18} /> Export
-          </button>
+          <div className="relative group">
+            <button 
+              className="px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50 flex items-center gap-2" 
+              type="button"
+            >
+              <Download size={18} /> Export
+            </button>
+            <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-slate-200 bg-white shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
+              <button
+                onClick={() => handleExport('csv')}
+                className="w-full px-4 py-3 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-t-2xl flex items-center gap-2"
+              >
+                <FileText size={16} /> Export as CSV
+              </button>
+              <button
+                onClick={() => handleExport('excel')}
+                className="w-full px-4 py-3 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-b-2xl flex items-center gap-2"
+              >
+                <FileSpreadsheet size={16} /> Export as Excel
+              </button>
+            </div>
+          </div>
           <button 
             onClick={() => setShowBulkImport(true)}
             className="px-4 py-3 rounded-2xl border border-slate-200 bg-white text-slate-700 font-semibold hover:bg-slate-50 flex items-center gap-2" 
@@ -843,51 +934,74 @@ export default function AdvancedInventory({ onInventoryUpdate }) {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Upload JSON File</label>
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={handleFileImport}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500"
-                />
-              </div>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-200"></div>
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-2 text-slate-500">Or paste JSON</span>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Select Format</label>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setImportFormat('csv')}
+                    className={`flex-1 py-3 px-4 rounded-2xl border font-semibold flex items-center justify-center gap-2 ${
+                      importFormat === 'csv'
+                        ? 'bg-emerald-600 border-emerald-600 text-white'
+                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <FileText size={18} /> CSV
+                  </button>
+                  <button
+                    onClick={() => setImportFormat('excel')}
+                    className={`flex-1 py-3 px-4 rounded-2xl border font-semibold flex items-center justify-center gap-2 ${
+                      importFormat === 'excel'
+                        ? 'bg-emerald-600 border-emerald-600 text-white'
+                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <FileSpreadsheet size={18} /> Excel
+                  </button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">JSON Data</label>
-                <textarea
-                  value={bulkImportData}
-                  onChange={(e) => setBulkImportData(e.target.value)}
-                  placeholder='[{"name": "Product 1", "sku": "SKU-001", "stock": 100, "price": 10.00}]'
-                  rows={8}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500 font-mono"
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Upload {importFormat === 'csv' ? 'CSV' : 'Excel'} File
+                </label>
+                <input
+                  type="file"
+                  accept={importFormat === 'csv' ? '.csv' : '.xlsx,.xls'}
+                  onChange={handleFileImport}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 px-4 text-sm text-slate-900 outline-none focus:border-blue-500"
                 />
+                <p className="mt-2 text-xs text-slate-500">
+                  Supported formats: {importFormat === 'csv' ? '.csv' : '.xlsx, .xls'}
+                </p>
               </div>
 
               <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4">
-                <p className="text-sm text-blue-800 font-medium">Expected JSON Format:</p>
-                <pre className="mt-2 text-xs text-blue-700 overflow-x-auto bg-white rounded-xl p-3">
-{`[{
-  "name": "Product Name",
-  "sku": "SKU-001",
-  "barcode": "123456789",
-  "stock": 100,
-  "minStock": 10,
-  "maxStock": 500,
-  "price": 25.00,
-  "batch": "BATCH-001",
-  "warehouse": "Main",
-  "expiry": "2027-12-31"
-}]`}
-                </pre>
+                <p className="text-sm text-blue-800 font-medium">Expected Column Headers:</p>
+                <div className="mt-2 text-xs text-blue-700 grid grid-cols-2 gap-2">
+                  <div>
+                    <strong>Required:</strong>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                      <li>Name (or name)</li>
+                      <li>SKU / Barcode</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <strong>Optional:</strong>
+                    <ul className="list-disc list-inside mt-1 space-y-1">
+                      <li>Stock, Price</li>
+                      <li>Min_Stock, Max_Stock</li>
+                      <li>Batch, Warehouse</li>
+                      <li>Expiry, Image</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="mt-3 p-3 bg-white rounded-xl border border-blue-100">
+                  <p className="text-xs font-semibold text-blue-900 mb-2">Sample CSV:</p>
+                  <pre className="text-[10px] text-blue-700 overflow-x-auto">
+{`Name,SKU,Barcode,Stock,Price,Min_Stock,Max_Stock,Batch,Warehouse,Expiry
+Arabic Coffee,DEM-1001,123456,50,45.00,10,100,BATCH-001,Main,2027-12-31
+Fresh Milk,DEM-1002,789012,100,12.50,20,200,BATCH-002,Main,2026-06-30`}
+                  </pre>
+                </div>
               </div>
             </div>
 
@@ -898,15 +1012,6 @@ export default function AdvancedInventory({ onInventoryUpdate }) {
                 className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-100"
               >
                 Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleBulkImport}
-                disabled={!bulkImportData.trim()}
-                className="rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 justify-center"
-              >
-                <Upload size={16} />
-                Import Items
               </button>
             </div>
           </div>
