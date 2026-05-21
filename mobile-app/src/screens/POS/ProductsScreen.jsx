@@ -12,6 +12,7 @@ import {
   Image,
   Platform,
   ScrollView,
+  Picker,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { posService } from '../../services/api';
@@ -85,16 +86,16 @@ export function ProductsScreen({ navigation }) {
         <Text style={styles.productPrice}>AED {item.price.toFixed(2)}</Text>
       </View>
 
-      {/* Small add button at top-right */}
+      {/* Big add button - same size as image */}
       <TouchableOpacity
         style={[
-          styles.addButtonSmall,
+          styles.addButton,
           { opacity: item.stock > 0 ? 1 : 0.5 }
         ]}
         onPress={() => handleAddToCart(item)}
         disabled={item.stock <= 0}
       >
-        <Text style={styles.addButtonSmallText}>+</Text>
+        <Text style={styles.addButtonIcon}>+</Text>
       </TouchableOpacity>
     </View>
   );
@@ -116,23 +117,20 @@ export function ProductsScreen({ navigation }) {
       <View style={styles.sectionBar}>
         <Text style={styles.sectionTitle}>Products</Text>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll} contentContainerStyle={{paddingHorizontal:4}}>
-          <TouchableOpacity
-            style={[styles.categoryChip, selectedCategory === '' && styles.categoryChipActive]}
-            onPress={() => handleSelectCategory('')}
+        {/* Category Dropdown */}
+        <View style={styles.dropdownContainer}>
+          <Picker
+            selectedValue={selectedCategory}
+            onValueChange={handleSelectCategory}
+            style={styles.dropdown}
+            dropdownIconColor="#3b82f6"
           >
-            <Text style={[styles.categoryText, selectedCategory === '' && styles.categoryTextActive]}>All</Text>
-          </TouchableOpacity>
-          {categories.map((cat) => (
-            <TouchableOpacity
-              key={cat}
-              style={[styles.categoryChip, selectedCategory === cat && styles.categoryChipActive]}
-              onPress={() => handleSelectCategory(cat)}
-            >
-              <Text style={[styles.categoryText, selectedCategory === cat && styles.categoryTextActive]}>{cat}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+            <Picker.Item label="📦 All Categories" value="" />
+            {categories.map((cat) => (
+              <Picker.Item key={cat} label={cat} value={cat} />
+            ))}
+          </Picker>
+        </View>
 
         {Platform.OS === 'web' ? (
           <View style={[styles.searchGlass, styles.searchGlassWeb, {marginTop:8, flexDirection:'row', alignItems:'center'}]}>
@@ -256,6 +254,18 @@ const styles = StyleSheet.create({
   categoryTextActive: {
     color: '#fff',
   },
+  dropdownContainer: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+    overflow: 'hidden',
+  },
+  dropdown: {
+    height: 44,
+    color: '#fff',
+  },
   productCard: {
     backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 14,
@@ -314,11 +324,11 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#3b82f6',
   },
-  addButtonSmall: {
+  addButton: {
     backgroundColor: '#2563eb',
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'absolute',
@@ -326,15 +336,15 @@ const styles = StyleSheet.create({
     right: 8,
     shadowColor: '#2563eb',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 8,
   },
-  addButtonSmallText: {
+  addButtonIcon: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 28,
     fontWeight: '800',
-    lineHeight: 18,
+    lineHeight: 32,
   },
   cartButton: {
     position: 'absolute',
