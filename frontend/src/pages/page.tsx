@@ -881,16 +881,26 @@ export default function POSPage() {
                       >
                         <button type="button" onClick={() => addToCart({ ...product, name: getProductDisplayName(product) })} className="w-full text-left">
                           <div className="flex items-start gap-3 min-w-0">
-                            <img
-                              src={product.image}
-                              alt={getProductDisplayName(product)}
-                              loading="lazy"
-                              onError={(event) => {
-                                event.currentTarget.onerror = null;
-                                event.currentTarget.src = 'https://placehold.co/96x96/ddd/555?text=Item';
-                              }}
-                              className="h-14 w-14 rounded-xl object-cover shadow-sm bg-slate-100"
-                            />
+                            <div className="h-14 w-14 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden shadow-sm">
+                              {product.image ? (
+                                <img
+                                  src={product.image}
+                                  alt={getProductDisplayName(product)}
+                                  loading="lazy"
+                                  onError={(event) => {
+                                    event.currentTarget.onerror = null;
+                                    event.currentTarget.src = 'https://placehold.co/56x56/ddd/555?text=Item';
+                                  }}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <img
+                                  src="https://placehold.co/56x56/ddd/555?text=Item"
+                                  alt="Item"
+                                  className="h-full w-full object-cover"
+                                />
+                              )}
+                            </div>
                             <div className="min-w-0 flex-1">
                               <p className="font-semibold text-sm text-slate-950 line-clamp-1">{getProductDisplayName(product)}</p>
                               <p className="mt-2 text-sm font-semibold text-slate-950">AED {product.price.toFixed(2)}</p>
