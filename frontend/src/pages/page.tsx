@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, Suspense } from 'react';
-import { ShoppingCart, CreditCard, Receipt, Search, Plus, Minus, Trash2, Users, Package, MessageSquare, Building2, Edit3, RotateCcw, Sun, Moon, Gift, Tag, Share2, Facebook, Instagram, Linkedin, Twitter, Globe, Send, Calendar, Hash, Image as ImageIcon, Video, Coffee, Milk, Cookie, Sparkles, Wine, Utensils, Apple, Croissant, Beef, Fish, IceCream, Pizza, Sandwich, Soup, Salad, Carrot, Cherry } from 'lucide-react';
+import { ShoppingCart, CreditCard, Receipt, Search, Plus, Minus, Trash2, Users, Package, MessageSquare, Building2, Edit3, RotateCcw, Sun, Moon, Gift, Tag, Share2, Facebook, Instagram, Linkedin, Twitter, Globe, Send, Calendar, Hash, Image as ImageIcon, Video, Coffee, Milk, Cookie, Sparkles, Wine, Utensils, Apple, Croissant, Beef, Fish, IceCream, Pizza, Sandwich, Soup, Salad, Carrot, Cherry, Wifi, WifiOff } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useSessionStore } from '../store/sessionStore';
 import { useModuleStore } from '../store/moduleStore';
@@ -870,8 +870,9 @@ export default function POSPage() {
                 </button>
                 <button
                   onClick={() => setOfflineMode((value) => !value)}
-                  className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${offlineMode ? 'bg-emerald-600 text-white' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}
+                  className={`rounded-2xl px-4 py-3 text-sm font-semibold transition flex items-center gap-2 ${offlineMode ? 'bg-emerald-600 text-white' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}
                 >
+                  {offlineMode ? <WifiOff size={18} /> : <Wifi size={18} />}
                   {offlineMode ? 'Offline Mode On' : 'Go Offline'}
                 </button>
               </div>
