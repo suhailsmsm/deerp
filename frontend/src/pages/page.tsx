@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, Suspense } from 'react';
-import { ShoppingCart, CreditCard, Receipt, Search, Plus, Minus, Trash2, Users, Package, MessageSquare, Building2, Edit3, RotateCcw, Sun, Moon, Gift, Tag, Share2, Facebook, Instagram, Linkedin, Twitter, Globe, Send, Calendar, Hash, Image as ImageIcon, Video, Coffee, Milk, Cookie, Sparkles, Wine, Utensils, Apple, Croissant, Beef, Fish, IceCream, Pizza, Sandwich, Soup, Salad, Bowl, Carrot, Lemon, Cherry, Peach, Pear } from 'lucide-react';
+import { ShoppingCart, CreditCard, Receipt, Search, Plus, Minus, Trash2, Users, Package, MessageSquare, Building2, Edit3, RotateCcw, Sun, Moon, Gift, Tag, Share2, Facebook, Instagram, Linkedin, Twitter, Globe, Send, Calendar, Hash, Image as ImageIcon, Video, Coffee, Milk, Cookie, Sparkles, Wine, Utensils, Apple, Croissant, Beef, Fish, IceCream, Pizza, Sandwich, Soup, Salad, Carrot, Cherry } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useSessionStore } from '../store/sessionStore';
 import { useModuleStore } from '../store/moduleStore';
@@ -66,7 +66,7 @@ const demoProducts = [
   { id: 1003, name: 'Chocolate Bar', barcode: 'DEM-1003', category: 'Snacks', price: 3.75, image: 'https://placehold.co/200x200/5D4037/FFF?text=Choco', icon: Cookie },
   { id: 1004, name: 'Detergent 1L', barcode: 'DEM-1004', category: 'Cleaning', price: 15.0, image: 'https://placehold.co/200x200/4FC3F7/333?text=Detergent', icon: Sparkles },
   { id: 1005, name: 'Bottled Water 500ml', barcode: 'DEM-1005', category: 'Beverages', price: 1.75, image: 'https://placehold.co/200x200/B3E5FC/333?text=Water', icon: Wine },
-  { id: 1006, name: 'Basmati Rice 5kg', barcode: 'DEM-1006', category: 'Grocery', price: 35.0, image: 'https://placehold.co/200x200/FFF8E1/333?text=Rice', icon: Bowl },
+  { id: 1006, name: 'Basmati Rice 5kg', barcode: 'DEM-1006', category: 'Grocery', price: 35.0, image: 'https://placehold.co/200x200/FFF8E1/333?text=Rice', icon: Utensils },
   { id: 1007, name: 'Olive Oil 500ml', barcode: 'DEM-1007', category: 'Grocery', price: 28.0, image: 'https://placehold.co/200x200/C5E1A5/333?text=Oil', icon: Apple },
   { id: 1008, name: 'Fresh Bread Loaf', barcode: 'DEM-1008', category: 'Bakery', price: 4.5, image: 'https://placehold.co/200x200/D7CCC8/333?text=Bread', icon: Croissant },
   { id: 1009, name: 'Chicken Breast 1kg', barcode: 'DEM-1009', category: 'Meat', price: 22.0, image: 'https://placehold.co/200x200/FFCDD2/333?text=Chicken', icon: Beef },
@@ -76,15 +76,15 @@ const demoProducts = [
   { id: 1013, name: 'Club Sandwich', barcode: 'DEM-1013', category: 'Deli', price: 16.0, image: 'https://placehold.co/200x200/FFF9C4/333?text=Sandwich', icon: Sandwich },
   { id: 1014, name: 'Tomato Soup 400ml', barcode: 'DEM-1014', category: 'Canned', price: 8.5, image: 'https://placehold.co/200x200/FFAB91/333?text=Soup', icon: Soup },
   { id: 1015, name: 'Caesar Salad', barcode: 'DEM-1015', category: 'Fresh', price: 14.0, image: 'https://placehold.co/200x200/C8E6C9/333?text=Salad', icon: Salad },
-  { id: 1016, name: 'Fresh Orange Juice', barcode: 'DEM-1016', category: 'Beverages', price: 9.0, image: 'https://placehold.co/200x200/FFE082/333?text=Juice', icon: Lemon },
-  { id: 1017, name: 'Mixed Nuts 250g', barcode: 'DEM-1017', category: 'Snacks', price: 19.0, image: 'https://placehold.co/200x200/D7CCC8/333?text=Nuts', icon: Apple },
+  { id: 1016, name: 'Fresh Orange Juice', barcode: 'DEM-1016', category: 'Beverages', price: 9.0, image: 'https://placehold.co/200x200/FFE082/333?text=Juice', icon: Wine },
+  { id: 1017, name: 'Mixed Nuts 250g', barcode: 'DEM-1017', category: 'Snacks', price: 19.0, image: 'https://placehold.co/200x200/D7CCC8/333?text=Nuts', icon: Cookie },
   { id: 1018, name: 'Strawberry Jam 300g', barcode: 'DEM-1018', category: 'Grocery', price: 11.0, image: 'https://placehold.co/200x200/F8BBD0/333?text=Jam', icon: Cherry },
   { id: 1019, name: 'Green Tea 20 Bags', barcode: 'DEM-1019', category: 'Beverages', price: 13.5, image: 'https://placehold.co/200x200/A5D6A7/333?text=Tea', icon: Coffee },
   { id: 1020, name: 'Pasta Penne 500g', barcode: 'DEM-1020', category: 'Grocery', price: 6.5, image: 'https://placehold.co/200x200/FFF59D/333?text=Pasta', icon: Utensils },
   { id: 1021, name: 'Fresh Carrots 1kg', barcode: 'DEM-1021', category: 'Vegetables', price: 5.0, image: 'https://placehold.co/200x200/FFCC80/333?text=Carrots', icon: Carrot },
   { id: 1022, name: 'Red Apples 1kg', barcode: 'DEM-1022', category: 'Fruits', price: 8.0, image: 'https://placehold.co/200x200/EF9A9A/333?text=Apples', icon: Apple },
-  { id: 1023, name: 'Fresh Peaches 500g', barcode: 'DEM-1023', category: 'Fruits', price: 12.0, image: 'https://placehold.co/200x200/FFAB91/333?text=Peaches', icon: Peach },
-  { id: 1024, name: 'Green Pears 1kg', barcode: 'DEM-1024', category: 'Fruits', price: 10.0, image: 'https://placehold.co/200x200/C5E1A5/333?text=Pears', icon: Pear },
+  { id: 1023, name: 'Fresh Peaches 500g', barcode: 'DEM-1023', category: 'Fruits', price: 12.0, image: 'https://placehold.co/200x200/FFAB91/333?text=Peaches', icon: Apple },
+  { id: 1024, name: 'Green Pears 1kg', barcode: 'DEM-1024', category: 'Fruits', price: 10.0, image: 'https://placehold.co/200x200/C5E1A5/333?text=Pears', icon: Apple },
   { id: 1025, name: 'Potato Chips 150g', barcode: 'DEM-1025', category: 'Snacks', price: 5.5, image: 'https://placehold.co/200x200/FFE082/333?text=Chips', icon: Cookie },
 ];
 
@@ -95,7 +95,7 @@ const categoryIcons: Record<string, any> = {
   Beverages: Wine,
   Dairy: Milk,
   Snacks: Cookie,
-  Grocery: Bowl,
+  Grocery: Utensils,
   Bakery: Croissant,
   Meat: Beef,
   Seafood: Fish,
