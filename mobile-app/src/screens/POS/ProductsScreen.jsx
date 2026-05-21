@@ -114,6 +114,7 @@ export function ProductsScreen({ navigation }) {
       </View>
 
       <View style={styles.sectionBar}>
+        <Text style={styles.sectionTitle}>Products</Text>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll} contentContainerStyle={{paddingHorizontal:4}}>
           <TouchableOpacity
