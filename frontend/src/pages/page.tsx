@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, Suspense } from 'react';
-import { ShoppingCart, CreditCard, Receipt, Search, Plus, Minus, Trash2, Users, Package, MessageSquare, Building2, Edit3, RotateCcw, Sun, Moon, Gift, Tag, Share2, Facebook, Instagram, Linkedin, Twitter, Globe, Send, Calendar, Hash, Image as ImageIcon, Video } from 'lucide-react';
+import { ShoppingCart, CreditCard, Receipt, Search, Plus, Minus, Trash2, Users, Package, MessageSquare, Building2, Edit3, RotateCcw, Sun, Moon, Gift, Tag, Share2, Facebook, Instagram, Linkedin, Twitter, Globe, Send, Calendar, Hash, Image as ImageIcon, Video, Coffee, Milk, Cookie, Sparkles, Wine, Utensils, Apple, Croissant, Beef, Fish, IceCream, Pizza, Sandwich, Soup, Salad, Bowl, Carrot, Lemon, Cherry, Peach, Pear } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useSessionStore } from '../store/sessionStore';
 import { useModuleStore } from '../store/moduleStore';
@@ -61,14 +61,52 @@ const demoLoyaltyActivity = [
 ];
 
 const demoProducts = [
-  { id: 1001, name: 'Demo Coffee Beans 1kg', barcode: 'DEM-1001', category: 'Beverages', price: 45.0, image: null },
-  { id: 1002, name: 'Demo Milk 2L', barcode: 'DEM-1002', category: 'Dairy', price: 12.5, image: null },
-  { id: 1003, name: 'Demo Chocolate Bar', barcode: 'DEM-1003', category: 'Snacks', price: 3.75, image: null },
-  { id: 1004, name: 'Demo Detergent 1L', barcode: 'DEM-1004', category: 'Cleaning', price: 15.0, image: null },
-  { id: 1005, name: 'Demo Bottled Water 500ml', barcode: 'DEM-1005', category: 'Beverages', price: 1.75, image: null },
+  { id: 1001, name: 'Arabic Coffee Beans 1kg', barcode: 'DEM-1001', category: 'Beverages', price: 45.0, image: 'https://placehold.co/200x200/8B4513/FFF?text=Coffee', icon: Coffee },
+  { id: 1002, name: 'Fresh Milk 2L', barcode: 'DEM-1002', category: 'Dairy', price: 12.5, image: 'https://placehold.co/200x200/E8F4F8/333?text=Milk', icon: Milk },
+  { id: 1003, name: 'Chocolate Bar', barcode: 'DEM-1003', category: 'Snacks', price: 3.75, image: 'https://placehold.co/200x200/5D4037/FFF?text=Choco', icon: Cookie },
+  { id: 1004, name: 'Detergent 1L', barcode: 'DEM-1004', category: 'Cleaning', price: 15.0, image: 'https://placehold.co/200x200/4FC3F7/333?text=Detergent', icon: Sparkles },
+  { id: 1005, name: 'Bottled Water 500ml', barcode: 'DEM-1005', category: 'Beverages', price: 1.75, image: 'https://placehold.co/200x200/B3E5FC/333?text=Water', icon: Wine },
+  { id: 1006, name: 'Basmati Rice 5kg', barcode: 'DEM-1006', category: 'Grocery', price: 35.0, image: 'https://placehold.co/200x200/FFF8E1/333?text=Rice', icon: Bowl },
+  { id: 1007, name: 'Olive Oil 500ml', barcode: 'DEM-1007', category: 'Grocery', price: 28.0, image: 'https://placehold.co/200x200/C5E1A5/333?text=Oil', icon: Apple },
+  { id: 1008, name: 'Fresh Bread Loaf', barcode: 'DEM-1008', category: 'Bakery', price: 4.5, image: 'https://placehold.co/200x200/D7CCC8/333?text=Bread', icon: Croissant },
+  { id: 1009, name: 'Chicken Breast 1kg', barcode: 'DEM-1009', category: 'Meat', price: 22.0, image: 'https://placehold.co/200x200/FFCDD2/333?text=Chicken', icon: Beef },
+  { id: 1010, name: 'Fresh Salmon 500g', barcode: 'DEM-1010', category: 'Seafood', price: 45.0, image: 'https://placehold.co/200x200/BBDEFB/333?text=Salmon', icon: Fish },
+  { id: 1011, name: 'Vanilla Ice Cream', barcode: 'DEM-1011', category: 'Frozen', price: 18.0, image: 'https://placehold.co/200x200/F3E5F5/333?text=Ice+Cream', icon: IceCream },
+  { id: 1012, name: 'Margherita Pizza', barcode: 'DEM-1012', category: 'Frozen', price: 25.0, image: 'https://placehold.co/200x200/FFECB3/333?text=Pizza', icon: Pizza },
+  { id: 1013, name: 'Club Sandwich', barcode: 'DEM-1013', category: 'Deli', price: 16.0, image: 'https://placehold.co/200x200/FFF9C4/333?text=Sandwich', icon: Sandwich },
+  { id: 1014, name: 'Tomato Soup 400ml', barcode: 'DEM-1014', category: 'Canned', price: 8.5, image: 'https://placehold.co/200x200/FFAB91/333?text=Soup', icon: Soup },
+  { id: 1015, name: 'Caesar Salad', barcode: 'DEM-1015', category: 'Fresh', price: 14.0, image: 'https://placehold.co/200x200/C8E6C9/333?text=Salad', icon: Salad },
+  { id: 1016, name: 'Fresh Orange Juice', barcode: 'DEM-1016', category: 'Beverages', price: 9.0, image: 'https://placehold.co/200x200/FFE082/333?text=Juice', icon: Lemon },
+  { id: 1017, name: 'Mixed Nuts 250g', barcode: 'DEM-1017', category: 'Snacks', price: 19.0, image: 'https://placehold.co/200x200/D7CCC8/333?text=Nuts', icon: Apple },
+  { id: 1018, name: 'Strawberry Jam 300g', barcode: 'DEM-1018', category: 'Grocery', price: 11.0, image: 'https://placehold.co/200x200/F8BBD0/333?text=Jam', icon: Cherry },
+  { id: 1019, name: 'Green Tea 20 Bags', barcode: 'DEM-1019', category: 'Beverages', price: 13.5, image: 'https://placehold.co/200x200/A5D6A7/333?text=Tea', icon: Coffee },
+  { id: 1020, name: 'Pasta Penne 500g', barcode: 'DEM-1020', category: 'Grocery', price: 6.5, image: 'https://placehold.co/200x200/FFF59D/333?text=Pasta', icon: Utensils },
+  { id: 1021, name: 'Fresh Carrots 1kg', barcode: 'DEM-1021', category: 'Vegetables', price: 5.0, image: 'https://placehold.co/200x200/FFCC80/333?text=Carrots', icon: Carrot },
+  { id: 1022, name: 'Red Apples 1kg', barcode: 'DEM-1022', category: 'Fruits', price: 8.0, image: 'https://placehold.co/200x200/EF9A9A/333?text=Apples', icon: Apple },
+  { id: 1023, name: 'Fresh Peaches 500g', barcode: 'DEM-1023', category: 'Fruits', price: 12.0, image: 'https://placehold.co/200x200/FFAB91/333?text=Peaches', icon: Peach },
+  { id: 1024, name: 'Green Pears 1kg', barcode: 'DEM-1024', category: 'Fruits', price: 10.0, image: 'https://placehold.co/200x200/C5E1A5/333?text=Pears', icon: Pear },
+  { id: 1025, name: 'Potato Chips 150g', barcode: 'DEM-1025', category: 'Snacks', price: 5.5, image: 'https://placehold.co/200x200/FFE082/333?text=Chips', icon: Cookie },
 ];
 
-const quickCategories = ['All', 'Grocery', 'Beverages', 'Dairy', 'Snacks', 'Cleaning'];
+const quickCategories = ['All', 'Beverages', 'Dairy', 'Snacks', 'Grocery', 'Bakery', 'Meat', 'Seafood', 'Frozen', 'Deli', 'Canned', 'Fresh', 'Vegetables', 'Fruits', 'Cleaning'];
+
+const categoryIcons: Record<string, any> = {
+  All: Package,
+  Beverages: Wine,
+  Dairy: Milk,
+  Snacks: Cookie,
+  Grocery: Bowl,
+  Bakery: Croissant,
+  Meat: Beef,
+  Seafood: Fish,
+  Frozen: IceCream,
+  Deli: Sandwich,
+  Canned: Soup,
+  Fresh: Salad,
+  Vegetables: Carrot,
+  Fruits: Apple,
+  Cleaning: Sparkles,
+};
 const paymentOptions = ['cash', 'card', 'bank transfer', 'tabby', 'tamara'];
 const currencyOptions = [
   { code: 'AED', symbol: 'د.إ' },
@@ -838,19 +876,27 @@ export default function POSPage() {
             </div>
 
             <div className="flex flex-col md:flex-row gap-4 flex-1 min-h-0 overflow-hidden">
-              <aside className="hidden xl:flex xl:w-56 flex-col gap-4 min-h-0 overflow-y-auto xl:max-h-[calc(100vh-7rem)] sticky top-24">
+              <aside className="hidden md:flex md:w-56 flex-col gap-4 min-h-0 overflow-y-auto md:max-h-[calc(100vh-7rem)] sticky top-24">
                 <div className="rounded-[1.5rem] bg-slate-950/5 ring-1 ring-slate-200/70 p-5 shadow-sm backdrop-blur-xl">
                   <h2 className="text-lg font-semibold mb-4 text-slate-950">Categories</h2>
-                  <div className="space-y-3">
-                    {quickCategories.map((category) => (
-                      <button
-                        key={category}
-                        onClick={() => setSelectedCategory(category)}
-                        className={`w-full text-left rounded-2xl px-4 py-3 text-sm font-medium transition ${selectedCategory === category ? 'bg-slate-900 text-white shadow-sm' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'}`}
-                      >
-                        {category}
-                      </button>
-                    ))}
+                  <div className="space-y-2">
+                    {quickCategories.map((category) => {
+                      const Icon = categoryIcons[category] || Package;
+                      return (
+                        <button
+                          key={category}
+                          onClick={() => setSelectedCategory(category)}
+                          className={`w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition ${
+                            selectedCategory === category 
+                              ? 'bg-slate-900 text-white shadow-sm' 
+                              : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                          }`}
+                        >
+                          <Icon size={18} className={selectedCategory === category ? 'text-white' : 'text-slate-500'} />
+                          <span>{category}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -873,15 +919,16 @@ export default function POSPage() {
 
               <div className="flex-1 flex flex-col gap-4 min-h-0 overflow-hidden">
                 <div className="bg-white rounded-[1.5rem] ring-1 ring-slate-200/70 p-3 overflow-auto flex-1 min-h-0 shadow-sm">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {filteredProducts.slice(0, 12).map((product) => (
-                      <div
-                        key={product.id}
-                        className="rounded-xl border border-slate-200/80 bg-slate-50 p-2 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-                      >
-                        <button type="button" onClick={() => addToCart({ ...product, name: getProductDisplayName(product) })} className="w-full text-left">
-                          <div className="flex items-start gap-3 min-w-0">
-                            <div className="h-14 w-14 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden shadow-sm" style={{ minWidth: '56px', minHeight: '56px' }}>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {filteredProducts.map((product) => {
+                      const ProductIcon = product.icon || categoryIcons[product.category] || Package;
+                      return (
+                        <div
+                          key={product.id}
+                          className="rounded-xl border border-slate-200/80 bg-white p-3 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg flex flex-col items-center text-center"
+                        >
+                          <button type="button" onClick={() => addToCart({ ...product, name: getProductDisplayName(product) })} className="w-full flex flex-col items-center">
+                            <div className="h-20 w-20 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden shadow-sm mb-3 flex items-center justify-center" style={{ minWidth: '80px', minHeight: '80px' }}>
                               {product.image ? (
                                 <img
                                   src={product.image}
@@ -889,29 +936,22 @@ export default function POSPage() {
                                   loading="lazy"
                                   onError={(event) => {
                                     event.currentTarget.onerror = null;
-                                    event.currentTarget.src = 'https://placehold.co/56x56/ddd/555?text=Item';
+                                    event.currentTarget.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2394a3b8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L11 5.5l-5.5 8.5 2 2.5zm5.5-4.91c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z"/></svg>';
                                   }}
                                   className="h-full w-full object-cover"
-                                  style={{ width: '100%', height: '100%', maxWidth: '56px', maxHeight: '56px' }}
+                                  style={{ width: '100%', height: '100%' }}
                                 />
                               ) : (
-                                <img
-                                  src="https://placehold.co/56x56/ddd/555?text=Item"
-                                  alt="Item"
-                                  className="h-full w-full object-cover"
-                                  style={{ width: '100%', height: '100%', maxWidth: '56px', maxHeight: '56px' }}
-                                />
+                                <ProductIcon size={40} className="text-slate-400" />
                               )}
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="font-semibold text-sm text-slate-950 line-clamp-1">{getProductDisplayName(product)}</p>
-                              <p className="mt-2 text-sm font-semibold text-slate-950">AED {product.price.toFixed(2)}</p>
-                              <p className="mt-1 text-xs text-slate-500 truncate">SKU {product.barcode}</p>
-                            </div>
-                          </div>
-                        </button>
-                      </div>
-                    ))}
+                            <p className="font-semibold text-sm text-slate-950 line-clamp-2 mb-1">{getProductDisplayName(product)}</p>
+                            <p className="text-base font-bold text-slate-900">AED {product.price.toFixed(2)}</p>
+                            <p className="mt-1 text-xs text-slate-500">{product.category}</p>
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
