@@ -15,7 +15,6 @@ import * as Sharing from 'expo-sharing';
 import { posService } from '../../services/api';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import NetworkStatus from '../../components/NetworkStatus';
 
 export function SalesScreen({ navigation }) {
   const [transactions, setTransactions] = useState([]);
@@ -201,7 +200,6 @@ export function SalesScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <NetworkStatus />
       <Text style={styles.debugText}>{debugInfo}</Text>
       <View style={styles.toolbar}>
         <FlatList
