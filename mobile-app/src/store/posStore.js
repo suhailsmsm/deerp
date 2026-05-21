@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { posService } from '../services/api';
 
 // Platform detection
-const isWeb = typeof window !== 'undefined' && !window.navigator?.product?.includes('ReactNative');
+const isWeb = typeof document !== 'undefined';
 
 export const usePosStore = create((set, get) => ({
   cart: [],
@@ -126,10 +126,11 @@ export const usePosStore = create((set, get) => ({
     try {
       const state = get();
       const now = new Date().toISOString();
+      const txnId = `txn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
       const transaction = {
-        id: `txn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        transactionId: `txn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: txnId,
+        transactionId: txnId,
         items: state.cart.map((item) => ({
           productId: item.id,
           name: item.name,
@@ -145,26 +146,29 @@ export const usePosStore = create((set, get) => ({
         updatedAt: now,
       };
 
-      if (isWeb) {
-        // Web: save to localStorage
-        console.log('🌐 Saving to localStorage');
-        const existingTransactions = JSON.parse(
-          localStorage.getItem('pos_transactions') || '[]'
-        );
-        localStorage.setItem(
-          'pos_transactions',
-          JSON.stringify([transaction, ...existingTransactions])
-        );
-        console.log('✅ Transaction saved:', transaction.id);
-      } else {
-        // Native: save to SQLite
-        console.log('💾 Saving to SQLite');
-        const { saveTransaction, updateProductStock } = await import('../db/index');
-        await saveTransaction(transaction);
-        for (const item of transaction.items) {
-          await updateProductStock(item.productId, item.quantity);
+      // Save to localStorage (works on both web and mobile)
+      console.log('💾 Saving transaction to localStorage');
+      const existingTransactions = JSON.parse(
+        localStorage.getItem('pos_transactions') || '[]'
+      );
+      localStorage.setItem(
+        'pos_transactions',
+        JSON.stringify([transaction, ...existingTransactions])
+      );
+      console.log('✅ Transaction saved:', transaction.id);
+
+      // Try native SQLite save if available (mobile only)
+      if (!isWeb) {
+        try {
+          const { saveTransaction, updateProductStock } = await import('../db/index');
+          await saveTransaction(transaction);
+          for (const item of transaction.items) {
+            await updateProductStock(item.productId, item.quantity);
+          }
+          console.log('✅ Also saved to SQLite');
+        } catch (dbError) {
+          console.log('ℹ️ SQLite not available, localStorage used');
         }
-        console.log('✅ Transaction saved:', transaction.id);
       }
 
       get().clearCart();
