@@ -1,7 +1,13 @@
 import { create } from 'zustand';
 import { posService } from '../services/api';
-import * as db from '../db/database';
-import * as sync from '../db/syncService';
+
+// Only import database modules on native platforms (not web)
+let db, sync;
+if (typeof window === 'undefined' || window.navigator?.product === 'ReactNative') {
+  // Native platform
+  import('../db/database').then(module => { db = module; });
+  import('../db/syncService').then(module => { sync = module; });
+}
 
 export const usePosStore = create((set, get) => ({
   cart: [],
@@ -14,8 +20,12 @@ export const usePosStore = create((set, get) => ({
   error: null,
   syncStatus: { online: true, pending: 0, unsynced: 0 },
 
-  // Initialize database on store creation
+  // Initialize database on store creation (native only)
   init: async () => {
+    if (!db || !sync) {
+      console.log('📱 Web platform: skipping database initialization');
+      return;
+    }
     try {
       await db.initDatabase();
       await sync.initSyncSystem();
@@ -139,25 +149,37 @@ export const usePosStore = create((set, get) => ({
         updatedAt: now,
       };
 
-      // STEP 1: Save to local database immediately (optimistic write)
-      await db.saveTransaction(transaction);
-      console.log('💾 Transaction saved locally:', transaction.transactionId);
+      // STEP 1: Save to local database immediately (if available)
+      if (db && db.saveTransaction) {
+        await db.saveTransaction(transaction);
+        console.log('💾 Transaction saved locally:', transaction.transactionId);
 
-      // STEP 2: Update local stock immediately
-      for (const item of transaction.items) {
-        await db.updateProductStock(item.productId, item.quantity);
-      }
+        // STEP 2: Update local stock immediately
+        for (const item of transaction.items) {
+          await db.updateProductStock(item.productId, item.quantity);
+        }
 
-      // STEP 3: Try to sync to server in background
-      const isConnected = await sync.checkConnectivity();
-      
-      if (isConnected) {
-        // Fire-and-forget sync (don't wait for response)
-        sync.syncPendingTransactions().catch(err => {
-          console.error('Background sync failed:', err);
-        });
+        // STEP 3: Try to sync to server in background
+        const isConnected = await sync.checkConnectivity();
+        
+        if (isConnected) {
+          // Fire-and-forget sync (don't wait for response)
+          sync.syncPendingTransactions().catch(err => {
+            console.error('Background sync failed:', err);
+          });
+        } else {
+          console.log('📡 Offline: Transaction queued for sync');
+        }
       } else {
-        console.log('📡 Offline: Transaction queued for sync');
+        // Web fallback: save to localStorage
+        console.log('🌐 Web mode: saving to localStorage');
+        const existingTransactions = JSON.parse(
+          localStorage.getItem('pos_transactions') || '[]'
+        );
+        localStorage.setItem(
+          'pos_transactions',
+          JSON.stringify([transaction, ...existingTransactions])
+        );
       }
 
       // Clear cart and update UI immediately
@@ -178,7 +200,15 @@ export const usePosStore = create((set, get) => ({
   // Get local transactions
   getLocalTransactions: async (limit = 50, offset = 0) => {
     try {
-      return await db.getLocalTransactions(limit, offset);
+      if (db && db.getLocalTransactions) {
+        return await db.getLocalTransactions(limit, offset);
+      } else {
+        // Web fallback
+        const transactions = JSON.parse(
+          localStorage.getItem('pos_transactions') || '[]'
+        );
+        return transactions.slice(offset, offset + limit);
+      }
     } catch (error) {
       console.error('Failed to get local transactions:', error);
       return [];
@@ -188,8 +218,23 @@ export const usePosStore = create((set, get) => ({
   // Update sync status
   updateSyncStatus: async () => {
     try {
-      const status = await sync.getSyncStatus();
-      set({ syncStatus: status });
+      if (sync && sync.getSyncStatus) {
+        const status = await sync.getSyncStatus();
+        set({ syncStatus: status });
+      } else {
+        // Web fallback: just check if we have pending items
+        const transactions = JSON.parse(
+          localStorage.getItem('pos_transactions') || '[]'
+        );
+        set({ 
+          syncStatus: {
+            online: navigator.onLine,
+            pending: 0,
+            unsynced: transactions.filter(t => !t.synced).length,
+            failed: 0,
+          }
+        });
+      }
     } catch (error) {
       console.error('Failed to update sync status:', error);
     }
@@ -199,9 +244,14 @@ export const usePosStore = create((set, get) => ({
   triggerSync: async () => {
     set({ isLoading: true });
     try {
-      const result = await sync.triggerManualSync();
-      get().updateSyncStatus();
-      return result;
+      if (sync && sync.triggerManualSync) {
+        const result = await sync.triggerManualSync();
+        get().updateSyncStatus();
+        return result;
+      } else {
+        console.log('🌐 Web mode: sync not available');
+        return { transactions: { synced: 0, failed: 0 }, queue: { processed: 0, failed: 0 }, stats: {} };
+      }
     } catch (error) {
       console.error('Manual sync failed:', error);
       throw error;

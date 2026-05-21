@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { usePosStore } from '../../store/posStore';
-import * as sync from '../../db/syncService';
 
 export default function NetworkStatus() {
   const { syncStatus, triggerSync } = usePosStore();
