@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from './src/store/authStore';
 import { useSettingsStore } from './src/store/settingsStore';
+import { usePosStore } from './src/store/posStore';
 
 import { LoginScreen } from './src/screens/Auth/LoginScreen';
 import PosScreen from './src/screens/POS/PosScreen';
@@ -187,18 +188,31 @@ function MainApp() {
 
 export default function App() {
   const [isReady, setIsReady] = useState(false);
+  const [initError, setInitError] = useState(null);
   const { restoreSession, user } = useAuthStore();
   const { loadLocalSettings } = useSettingsStore();
+  const { init: initPosStore } = usePosStore();
 
   useEffect(() => {
     const bootstrap = async () => {
       try {
+        console.log('🚀 App bootstrapping...');
+        
+        // Initialize settings
         await loadLocalSettings();
+        
+        // Initialize POS store with offline-first database
+        await initPosStore();
+        
+        // Restore auth session
         const hasSession = await restoreSession();
-      } catch (error) {
-        console.error('Bootstrap error:', error);
-      } finally {
+        
+        console.log('✅ App bootstrap complete');
         setIsReady(true);
+      } catch (error) {
+        console.error('❌ Bootstrap error:', error);
+        setInitError(error.message);
+        setIsReady(true); // Still show app, but with error state
       }
     };
 
@@ -207,8 +221,19 @@ export default function App() {
 
   if (!isReady) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a' }}>
+        <ActivityIndicator size="large" color="#3b82f6" />
+        <Text style={{ color: '#fff', marginTop: 16, fontSize: 14 }}>Initializing offline database...</Text>
+      </View>
+    );
+  }
+
+  if (initError) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a', padding: 20 }}>
+        <Text style={{ color: '#ef4444', fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>⚠️ Initialization Error</Text>
+        <Text style={{ color: '#94a3b8', fontSize: 14, textAlign: 'center' }}>{initError}</Text>
+        <Text style={{ color: '#64748b', fontSize: 12, marginTop: 16, textAlign: 'center' }}>The app may have limited functionality without database access.</Text>
       </View>
     );
   }

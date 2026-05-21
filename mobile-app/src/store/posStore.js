@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { posService } from '../services/api';
+import * as db from '../db/database';
+import * as sync from '../db/syncService';
 
 export const usePosStore = create((set, get) => ({
   cart: [],
@@ -10,6 +12,20 @@ export const usePosStore = create((set, get) => ({
   paymentMethod: 'cash',
   isLoading: false,
   error: null,
+  syncStatus: { online: true, pending: 0, unsynced: 0 },
+
+  // Initialize database on store creation
+  init: async () => {
+    try {
+      await db.initDatabase();
+      await sync.initSyncSystem();
+      get().updateSyncStatus();
+      console.log('✅ POS Store initialized with offline-first mode');
+    } catch (error) {
+      console.error('❌ Failed to initialize POS Store:', error);
+      set({ error: 'Failed to initialize database' });
+    }
+  },
 
   addItem: (product, quantity = 1) => {
     set((state) => {
@@ -67,12 +83,20 @@ export const usePosStore = create((set, get) => ({
     const subtotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     try {
-      const taxData = await posService.calculateTax(subtotal);
-      set({
-        subtotal: taxData.subtotal,
-        vat: taxData.vat,
-        total: taxData.total - state.discount,
-      });
+      // Try API first, fallback to local calculation
+      try {
+        const taxData = await posService.calculateTax(subtotal);
+        set({
+          subtotal: taxData.subtotal,
+          vat: taxData.vat,
+          total: taxData.total - state.discount,
+        });
+      } catch (error) {
+        // Local calculation fallback
+        const vat = subtotal * 0.05; // 5% UAE VAT
+        const total = subtotal + vat - state.discount;
+        set({ subtotal, vat, total });
+      }
     } catch (error) {
       console.error('Failed to calculate tax:', error);
     }
@@ -90,68 +114,99 @@ export const usePosStore = create((set, get) => ({
     set({ paymentMethod: method });
   },
 
+  // OPTIMISTIC WRITE: Save to local DB first, then sync to server
   createTransaction: async () => {
     set({ isLoading: true, error: null });
     try {
       const state = get();
+      const now = new Date().toISOString();
       
-      // Try to save to API first
-      try {
-        const transaction = await posService.createTransaction({
-          items: state.cart.map((item) => ({
-            productId: item.id,
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-          subtotal: state.subtotal,
-          vat: state.vat,
-          total: state.total,
-          discount: state.discount,
-          method: state.paymentMethod,
-        });
+      // Create transaction object
+      const transaction = {
+        transactionId: `txn-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        items: state.cart.map((item) => ({
+          productId: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        subtotal: state.subtotal,
+        vat: state.vat,
+        total: state.total,
+        discount: state.discount,
+        method: state.paymentMethod,
+        createdAt: now,
+        updatedAt: now,
+      };
 
-        get().clearCart();
-        set({ isLoading: false });
-        return transaction;
-      } catch (apiError) {
-        // Fallback: Save to localStorage if API fails
-        console.warn('API unavailable, saving to localStorage:', apiError.message);
-        
-        const localTransaction = {
-          id: `local-${Date.now()}`,
-          items: state.cart.map((item) => ({
-            productId: item.id,
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-          subtotal: state.subtotal,
-          vat: state.vat,
-          total: state.total,
-          discount: state.discount,
-          method: state.paymentMethod,
-          createdAt: new Date().toISOString(),
-          synced: false,
-        };
+      // STEP 1: Save to local database immediately (optimistic write)
+      await db.saveTransaction(transaction);
+      console.log('💾 Transaction saved locally:', transaction.transactionId);
 
-        // Save to localStorage
-        const existingTransactions = JSON.parse(
-          localStorage.getItem('pos_transactions') || '[]'
-        );
-        localStorage.setItem(
-          'pos_transactions',
-          JSON.stringify([localTransaction, ...existingTransactions])
-        );
-
-        get().clearCart();
-        set({ isLoading: false });
-        return localTransaction;
+      // STEP 2: Update local stock immediately
+      for (const item of transaction.items) {
+        await db.updateProductStock(item.productId, item.quantity);
       }
+
+      // STEP 3: Try to sync to server in background
+      const isConnected = await sync.checkConnectivity();
+      
+      if (isConnected) {
+        // Fire-and-forget sync (don't wait for response)
+        sync.syncPendingTransactions().catch(err => {
+          console.error('Background sync failed:', err);
+        });
+      } else {
+        console.log('📡 Offline: Transaction queued for sync');
+      }
+
+      // Clear cart and update UI immediately
+      get().clearCart();
+      set({ isLoading: false });
+      
+      // Update sync status
+      get().updateSyncStatus();
+      
+      return transaction;
     } catch (error) {
-      const errorMessage = error.response?.data?.error || error.message || 'Transaction failed';
+      const errorMessage = error.message || 'Transaction failed';
       set({ error: errorMessage, isLoading: false });
       throw error;
+    }
+  },
+
+  // Get local transactions
+  getLocalTransactions: async (limit = 50, offset = 0) => {
+    try {
+      return await db.getLocalTransactions(limit, offset);
+    } catch (error) {
+      console.error('Failed to get local transactions:', error);
+      return [];
+    }
+  },
+
+  // Update sync status
+  updateSyncStatus: async () => {
+    try {
+      const status = await sync.getSyncStatus();
+      set({ syncStatus: status });
+    } catch (error) {
+      console.error('Failed to update sync status:', error);
+    }
+  },
+
+  // Manual sync trigger
+  triggerSync: async () => {
+    set({ isLoading: true });
+    try {
+      const result = await sync.triggerManualSync();
+      get().updateSyncStatus();
+      return result;
+    } catch (error) {
+      console.error('Manual sync failed:', error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
     }
   },
 
