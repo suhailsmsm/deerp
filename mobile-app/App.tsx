@@ -35,7 +35,7 @@ function PosStack() {
       <Stack.Screen
         name="Products"
         component={ProductsScreen}
-        options={{ title: 'Products' }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="Cart"
