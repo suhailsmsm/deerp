@@ -61,7 +61,8 @@ export function ProductsScreen({ navigation }) {
   };
 
   const handleAddToCart = (product) => {
-    if (product.stock <= 0) {
+    // Check stock if available, otherwise allow adding
+    if (product.stock !== undefined && product.stock <= 0) {
       Alert.alert('Out of Stock', `${product.name} is not available`);
       return;
     }
