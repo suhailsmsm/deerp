@@ -6,30 +6,8 @@ export default function SalesDashboard({ transactions = [], products = [] }) {
   const [timeRange, setTimeRange] = useState('7days'); // today, 7days, 30days, custom
   const [exportFormat, setExportFormat] = useState('pdf'); // pdf, excel, csv
 
-  // Demo transactions for visualization (remove when real data is available)
-  const demoTransactions = useMemo(() => {
-    const demo = [];
-    const today = new Date();
-    for (let i = 0; i < 30; i++) {
-      const date = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
-      const numTransactions = Math.floor(Math.random() * 20) + 10;
-      for (let j = 0; j < numTransactions; j++) {
-        demo.push({
-          id: `DEMO-${date.toISOString().split('T')[0]}-${j}`,
-          createdAt: date.toISOString(),
-          total: Math.random() * 500 + 50,
-          paymentMethod: ['cash', 'card', 'apple_pay', 'google_pay', 'tabby'][Math.floor(Math.random() * 5)],
-          items: JSON.stringify([
-            { name: 'Arabic Coffee', qty: Math.floor(Math.random() * 5) + 1, price: 45 },
-            { name: 'Fresh Milk', qty: Math.floor(Math.random() * 3) + 1, price: 12.5 },
-          ]),
-        });
-      }
-    }
-    return demo;
-  }, []);
-
-  const allTransactions = transactions.length > 0 ? transactions : demoTransactions;
+  // Use provided transactions or empty array if none available
+  const allTransactions = transactions.length > 0 ? transactions : [];
 
   // Process transactions for analytics
   const analytics = useMemo(() => {
@@ -109,6 +87,25 @@ export default function SalesDashboard({ transactions = [], products = [] }) {
     alert(`Exporting ${timeRange} report as ${format.toUpperCase()}...`);
     // Implementation would use libraries like html2pdf, xlsx, etc.
   };
+
+  // Show empty state if no transactions
+  if (allTransactions.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-950">Sales Dashboard</h1>
+            <p className="text-sm text-slate-500 mt-1">Real-time analytics and performance insights</p>
+          </div>
+        </div>
+        <div className="p-12 rounded-2xl border border-slate-200 bg-white text-center">
+          <BarChart3 className="mx-auto text-slate-300" size={64} />
+          <p className="mt-4 text-lg font-semibold text-slate-700">No Sales Data Yet</p>
+          <p className="mt-2 text-sm text-slate-500">Start processing transactions to see analytics and insights.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

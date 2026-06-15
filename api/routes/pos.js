@@ -210,4 +210,28 @@ router.get('/receipts/:id', async (req, res, next) => {
   }
 });
 
+// Get categories
+router.get('/categories', async (req, res, next) => {
+  try {
+    const categories = await prisma.product.groupBy({
+      by: ['category'],
+      where: {
+        category: {
+          not: null,
+        },
+      },
+    });
+
+    const categoryList = categories.map((c, index) => ({
+      id: c.category || `cat-${index}`,
+      name: c.category,
+      sortOrder: index,
+    }));
+
+    res.json(categoryList);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

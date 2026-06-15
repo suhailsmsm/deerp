@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useModuleStore } from '../store/moduleStore';
 import {
   BarChart3, BookOpen, Building2, CreditCard, Gift, LayoutDashboard, ListTodo,
   MessageCircle, Package, Settings, ShieldCheck, ShoppingCart, Truck,
   UserCheck, Users, Utensils, WalletCards, Landmark, Briefcase, BrainCircuit,
-  HardHat, Scan, Printer
+  HardHat, Scan, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 export default function Sidebar({ activePage, onPageChange }) {
   const { modules } = useModuleStore();
+  const [collapsed, setCollapsed] = useState(false);
 
   const groups = [
     {
@@ -19,10 +20,10 @@ export default function Sidebar({ activePage, onPageChange }) {
         { id: 'ai-insights', label: 'AI Features', icon: BrainCircuit, enabled: modules.ai },
         { id: 'inventory', label: 'Inventory Tracker', icon: Package, enabled: modules.inventory },
         { id: 'crm', label: 'CRM', icon: Users, enabled: modules.crm },
+        { id: 'social-poster', label: 'Social Scheduler', icon: MessageCircle, enabled: true },
         { id: 'loyalty', label: 'Loyalty & Promos', icon: Gift, enabled: modules.loyalty },
         { id: 'reports', label: 'Sales Reports', icon: BarChart3, enabled: true },
         { id: 'staff', label: 'Staff Management', icon: ShieldCheck, enabled: true },
-        { id: 'hardware', label: 'Hardware Devices', icon: Printer, enabled: true },
       ]
     },
     {
@@ -50,52 +51,79 @@ export default function Sidebar({ activePage, onPageChange }) {
   ];
 
   return (
-    <aside className="w-64 bg-slate-900 text-white h-screen flex flex-col">
-      <div className="p-6 flex items-center gap-3">
-        <img src="/assets/logo.png" alt="DERPX Ai" className="h-10 object-contain" />
-        <div>
-          <div className="text-sm font-bold text-blue-400">DERPX Ai</div>
-          <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Enterprise Suite</p>
+    <aside className={`${collapsed ? 'w-20' : 'w-64'} bg-slate-900 text-white h-screen flex flex-col transition-all duration-300 ease-in-out`}>
+      <div className={`p-6 flex items-center ${collapsed ? 'justify-center' : 'justify-between'}`}>
+        <div className="flex items-center gap-3">
+          <img src="/assets/logo.png" alt="DERPX Ai" className="h-10 object-contain flex-shrink-0" />
+          {!collapsed && (
+            <div>
+              <div className="text-sm font-bold text-[#80cd82]">DERPX Ai</div>
+              <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Enterprise Suite</p>
+            </div>
+          )}
         </div>
+        {!collapsed && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-[#80cd82] transition-all flex items-center justify-center flex-shrink-0"
+            title="Collapse Sidebar"
+          >
+            <ChevronLeft size={18} />
+          </button>
+        )}
       </div>
-      
-      <nav className="flex-1 px-4 space-y-1 overflow-auto">
+
+      {collapsed && (
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="mx-4 mb-4 p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-[#80cd82] transition-all flex items-center justify-center"
+          title="Expand Sidebar"
+        >
+          <ChevronRight size={18} />
+        </button>
+      )}
+
+      <nav className="flex-1 px-2 py-2 space-y-2 overflow-auto">
         {groups.map((group) => (
           <div key={group.label} className="mb-4">
-            <div className="text-[10px] text-slate-500 uppercase tracking-widest px-4 mb-2">{group.label}</div>
+            {!collapsed && (
+              <div className="text-[10px] text-slate-500 uppercase tracking-widest px-4 mb-2 dark:border-0 dark:border-none">{group.label}</div>
+            )}
             {group.items.filter(item => item.enabled).map((item) => {
               const Icon = item.icon;
               const isActive = activePage === item.id;
-              
+
               return (
                 <button
                   key={item.id}
                   onClick={() => onPageChange(item.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                    isActive 
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' 
-                      : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                  className={`w-full flex items-center ${collapsed ? 'justify-center' : 'gap-3'} ${collapsed ? 'px-3 py-4' : 'px-4 py-3'} rounded-xl transition-all ${
+                    isActive
+                      ? 'bg-[#80cd82] text-[#080056]'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-[#80cd82]'
                   }`}
+                  title={collapsed ? item.label : ''}
                 >
-                  <Icon size={20} />
-                  <span className="font-medium">{item.label}</span>
+                  <Icon size={20} className={`${isActive ? 'text-[#080056]' : ''} flex-shrink-0`} />
+                  {!collapsed && <span className="font-medium truncate">{item.label}</span>}
                 </button>
               );
             })}
           </div>
         ))}
       </nav>
-      
-      <div className="p-4 border-t border-slate-800">
+
+      <div className="p-2 pt-2">
         <button
           onClick={() => onPageChange('settings-admin')}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-400 hover:bg-slate-800 hover:text-slate-200`}
+          className={`w-full flex items-center ${collapsed ? 'justify-center' : 'gap-3'} ${collapsed ? 'px-3 py-4' : 'px-4 py-3'} rounded-xl transition-all text-slate-400 hover:bg-slate-800 hover:text-[#80cd82]`}
+          title={collapsed ? 'Settings & Admin' : ''}
         >
-          <Settings size={18} />
-          <span className="font-medium">Settings & Admin</span>
+          <Settings size={18} className="text-[#80cd82] flex-shrink-0" />
+          {!collapsed && <span className="font-medium">Settings & Admin</span>}
         </button>
 
-        <div className="mt-4 text-[10px] text-slate-500 text-center">V1.0.0 · Local SQLite</div>
+        {!collapsed && <div className="mt-4 text-[10px] text-slate-500 text-center">V1.0.0 · Local SQLite</div>}
       </div>
     </aside>
   );

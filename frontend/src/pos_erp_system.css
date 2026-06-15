@@ -56,7 +56,7 @@ body[data-theme="dark"] select,
 body[data-theme="dark"] button {
   color-scheme: dark;
 }
-.shell { display: flex; height: 640px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; background: var(--color-background-tertiary); }
+.shell { display: flex; min-height: 100vh; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; background: var(--color-background-tertiary); }
 .sidebar { width: var(--sidebar-w); background: var(--color-background-primary); border-right: 0.5px solid var(--color-border-tertiary); display: flex; flex-direction: column; flex-shrink: 0; }
 .sidebar-logo { padding: 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
 .sidebar-logo h1 { font-size: 15px; font-weight: 500; color: var(--color-text-primary); letter-spacing: -0.3px; }

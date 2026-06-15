@@ -21,6 +21,7 @@ const HRPayroll = React.lazy(() => import('./HRPayroll'));
 const Projects = React.lazy(() => import('./Projects'));
 const AIInsights = React.lazy(() => import('./AIInsights'));
 const SalesReports = React.lazy(() => import('./SalesReports'));
+const SocialMediaScheduler = React.lazy(() => import('./SocialMediaScheduler'));
 
 // Import new POS components
 import DiscountPanel from '../components/pos/DiscountPanel';
@@ -263,7 +264,10 @@ export default function POSPage() {
   }
 
   const handleCharge = async () => {
-    if (cart.length === 0) return;
+    if (cart.length === 0) {
+      alert('Cart is empty!');
+      return;
+    }
 
     const transaction = {
       type: orderMode,
@@ -285,13 +289,37 @@ export default function POSPage() {
       createdAt: new Date().toISOString(),
     };
 
-    const savedTxn = await window.electron.saveTransaction(transaction);
-    if (savedTxn) {
-      const html = await generateReceiptHtml(savedTxn, currentBranch, currentStaff);
-      await window.electron.printReceipt(html);
-      clearCart();
-      setOrderMode('sale');
-      alert(orderMode === 'return' ? 'Sales Return Completed & Receipt Printed' : 'Transaction Completed & Receipt Printed');
+    try {
+      // Check if running in electron app
+      if (window.electron) {
+        const savedTxn = await window.electron.saveTransaction(transaction);
+        if (savedTxn) {
+          const html = await generateReceiptHtml(savedTxn, currentBranch, currentStaff);
+          await window.electron.printReceipt(html);
+          clearCart();
+          setOrderMode('sale');
+          alert(orderMode === 'return' ? 'Sales Return Completed & Receipt Printed' : 'Transaction Completed & Receipt Printed');
+        }
+      } else {
+        // Browser mode - save to localStorage and show receipt
+        const savedTxn = { 
+          ...transaction, 
+          id: `txn_${Date.now()}`,
+          items: JSON.stringify(cart) // Convert to string for receipt generator
+        };
+        const existingTxns = JSON.parse(localStorage.getItem('derp_transactions') || '[]');
+        localStorage.setItem('derp_transactions', JSON.stringify([savedTxn, ...existingTxns]));
+
+        const html = await generateReceiptHtml(savedTxn, currentBranch, currentStaff);
+        setReceiptHtml(html);
+        setIsReceiptPreviewOpen(true);
+        clearCart();
+        setOrderMode('sale');
+        alert(orderMode === 'return' ? 'Sales Return Completed' : 'Transaction Completed! Receipt preview opened.');
+      }
+    } catch (error) {
+      console.error('Transaction failed:', error);
+      alert('Transaction failed. Please try again.');
     }
   };
 
@@ -323,7 +351,10 @@ export default function POSPage() {
   };
 
   const previewReceipt = async () => {
-    if (!cart.length) return;
+    if (!cart.length) {
+      alert('Cart is empty!');
+      return;
+    }
 
     const transaction = {
       id: 'preview',
@@ -338,9 +369,14 @@ export default function POSPage() {
       branchId: currentBranch?.id,
     };
 
-    const html = await generateReceiptHtml(transaction, currentBranch, currentStaff);
-    setReceiptHtml(html);
-    setIsReceiptPreviewOpen(true);
+    try {
+      const html = await generateReceiptHtml(transaction, currentBranch, currentStaff);
+      setReceiptHtml(html);
+      setIsReceiptPreviewOpen(true);
+    } catch (error) {
+      console.error('Failed to generate receipt:', error);
+      alert('Failed to generate receipt preview. Please try again.');
+    }
   };
 
   const openEditProduct = (product: any) => {
@@ -393,17 +429,21 @@ export default function POSPage() {
   });
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className={`flex h-screen ${darkMode ? 'dark bg-[#05051a]' : 'bg-[#faffff]'}`}>
       <Sidebar activePage={activePage} onPageChange={setActivePage} />
-      <main className="flex-1 flex flex-col overflow-hidden min-h-0 p-4 lg:p-6">
-        <div className="app-glass-shell mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3">
+      <main className={`flex-1 flex flex-col overflow-hidden min-h-0 p-4 lg:p-6 ${darkMode ? 'dark bg-[#05051a]' : 'bg-[#faffff]'}`}>
+        <div className={`app-glass-shell mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3 ${darkMode ? 'dark' : ''}`}>
           <div className="flex items-center gap-3">
             <img src="/assets/logo.png" alt="DERPX Ai" className="h-8 object-contain" />
             <span className="ml-2 text-lg font-extrabold">DERPX Ai</span>
             <button
               type="button"
               onClick={toggleDarkMode}
-              className="rounded-xl border border-white/70 bg-white/75 px-8 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-white flex items-center justify-start"
+              className={`rounded-xl border px-8 py-1.5 text-xs font-bold flex items-center justify-start transition ${
+                darkMode 
+                  ? 'border-[#1a1a6e] bg-[#1a1a6e] text-white hover:bg-[#25257a]' 
+                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+              }`}
             >
               {darkMode ? <Sun size={14} /> : <Moon size={14} />}
               <span className="ml-1">{darkMode ? 'Light' : 'Dark'}</span>
@@ -419,8 +459,7 @@ export default function POSPage() {
           </div>
         </div>
 
-
-        <div className="flex-1 min-h-0 overflow-auto rounded-3xl">
+        <div className="flex-1 min-h-0 overflow-auto">
           {activePage === 'dashboard' && (
             <div className="space-y-6">
               <h1 className="text-2xl font-bold">Dashboard Summary</h1>
@@ -618,109 +657,9 @@ export default function POSPage() {
         )}
 
         {activePage === 'social-poster' && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold">Social Media Poster</h1>
-              <div className="flex gap-2">
-                <button className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-sm font-bold border border-slate-200 hover:bg-white transition-colors">
-                  History
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex -space-x-2">
-                      {[
-                        { id: 'facebook', icon: Facebook, color: 'bg-blue-600' },
-                        { id: 'instagram', icon: Instagram, color: 'bg-pink-600' },
-                        { id: 'twitter', icon: Twitter, color: 'bg-sky-500' },
-                        { id: 'linkedin', icon: Linkedin, color: 'bg-blue-700' },
-                        { id: 'google', icon: Globe, color: 'bg-emerald-500' }
-                      ].map(platform => (
-                        <button
-                          key={platform.id}
-                          onClick={() => setSocialPlatforms(prev => ({ ...prev, [platform.id]: !prev[platform.id as keyof typeof prev] }))}
-                          className={`w-10 h-10 rounded-full border-2 border-white flex items-center justify-center text-white transition-all transform hover:scale-110 ${platform.color} ${socialPlatforms[platform.id as keyof typeof socialPlatforms] ? 'opacity-100' : 'opacity-20 grayscale'}`}
-                        >
-                          <platform.icon size={16} />
-                        </button>
-                      ))}
-                    </div>
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Target Channels</span>
-                  </div>
-
-                  <div className="relative">
-                    <textarea
-                      value={socialContent}
-                      onChange={(e) => setSocialContent(e.target.value)}
-                      placeholder="What's happening in your business? Share an update, deal, or new arrival..."
-                      className="w-full h-48 rounded-2xl border border-slate-100 bg-slate-50/50 p-5 text-slate-800 placeholder:text-slate-400 outline-none focus:border-blue-500 transition-all resize-none"
-                    />
-                    <button 
-                      onClick={generateAIHashtags}
-                      disabled={isGeneratingHashtags}
-                      className="absolute bottom-4 right-4 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold border border-indigo-100 flex items-center gap-1 hover:bg-indigo-100"
-                    >
-                      {isGeneratingHashtags ? <RotateCcw size={12} className="animate-spin" /> : <Hash size={12} />}
-                      {isGeneratingHashtags ? 'AI Thinking...' : 'AI Hashtags'}
-                    </button>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button className="flex-1 px-4 py-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 text-slate-500 flex items-center justify-center gap-2 hover:bg-white hover:border-blue-400 hover:text-blue-600 transition-all">
-                      <ImageIcon size={18} /> Add Photo
-                    </button>
-                    <button className="flex-1 px-4 py-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 text-slate-500 flex items-center justify-center gap-2 hover:bg-white hover:border-blue-400 hover:text-blue-600 transition-all">
-                      <Video size={18} /> Add Video
-                    </button>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <Calendar size={18} className="text-slate-400" />
-                    <input 
-                      type="datetime-local" 
-                      value={scheduledDate}
-                      onChange={(e) => setScheduledDate(e.target.value)}
-                      className="text-sm font-medium text-slate-600 outline-none bg-transparent"
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <button className="px-6 py-3 bg-slate-100 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors">
-                      Save Draft
-                    </button>
-                    <button className="px-8 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all">
-                      <Send size={18} /> {scheduledDate ? 'Schedule Post' : 'Publish Now'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50">
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Preview</h3>
-                  </div>
-                  <div className="p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-200" />
-                      <div className="flex-1">
-                        <div className="h-3 w-24 bg-slate-100 rounded-full mb-1" />
-                        <div className="h-2 w-16 bg-slate-50 rounded-full" />
-                      </div>
-                    </div>
-                    <div className="text-sm text-slate-600 whitespace-pre-wrap min-h-[100px]">
-                      {socialContent || "Start typing to see how your post looks..."}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Suspense fallback={<ModuleLoadingFallback />}>
+            <SocialMediaScheduler />
+          </Suspense>
         )}
 
         {activePage === 'reports' && (
@@ -924,7 +863,7 @@ export default function POSPage() {
                 <div className="bg-white rounded-[1.5rem] ring-1 ring-slate-200/70 p-3 overflow-auto flex-1 min-h-0 shadow-sm">
                   <div className="grid grid-cols-2 gap-3">
                     {filteredProducts.map((product) => {
-                      const ProductIcon = product.icon || categoryIcons[product.category] || Package;
+                      const ProductIcon = typeof product.icon === 'function' ? product.icon : (categoryIcons[product.category] && typeof categoryIcons[product.category] === 'function' ? categoryIcons[product.category] : Package);
                       return (
                         <button
                           key={product.id}
@@ -933,7 +872,7 @@ export default function POSPage() {
                           className="rounded-xl border border-slate-200/80 bg-white p-2.5 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg flex flex-row items-start text-left"
                         >
                           <div className="h-16 w-16 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden shadow-sm flex items-center justify-center relative">
-                            <ProductIcon size={28} className="text-slate-400" />
+                            {typeof ProductIcon === 'function' && <ProductIcon size={28} className="text-slate-400" />}
                             {product.image && (
                               <img
                                 src={product.image}

@@ -80,7 +80,7 @@ export default function AIInsights({ products = [], customers = [], cart = [] })
     if (!prompt) return;
 
     const lowerPrompt = prompt.toLowerCase();
-    let reply = `Based on current demo signals, expected sales are AED ${Math.round(insights.forecastRevenue).toLocaleString()} with ${insights.lowStockItems.length} stock-risk items.`;
+    let reply = `Based on current analytics, expected sales are AED ${Math.round(insights.forecastRevenue).toLocaleString()} with ${insights.lowStockItems.length} stock-risk items.`;
 
     if (lowerPrompt.includes('fraud') || lowerPrompt.includes('risk')) {
       reply = 'I found 2 alert patterns to review: repeated refunds under manager threshold and unusually high discount use on card payments.';
@@ -101,10 +101,6 @@ export default function AIInsights({ products = [], customers = [], cart = [] })
           <p className="text-sm uppercase tracking-[0.18em] text-slate-500">AI Command Center</p>
           <h1 className="mt-2 text-2xl font-bold text-slate-950">Smart Analytics & Automation</h1>
           <p className="mt-1 text-sm text-slate-500">Forecast demand, detect risk, and recommend the next best action.</p>
-        </div>
-        <div className="inline-flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
-          <Sparkles size={16} />
-          Demo AI active
         </div>
       </div>
 

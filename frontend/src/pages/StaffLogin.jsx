@@ -15,9 +15,9 @@ export default function StaffLogin() {
     if (nextPin.length === 4) {
       // Check if Electron bridge exists
       if (!window.electron) {
-        console.warn('Running in Browser: Demo Mode Enabled');
+        console.warn('Running in Browser Mode');
         if (nextPin === '1234') {
-          setStaff({ name: 'Demo User', role: 'Admin' });
+          setStaff({ name: 'Admin User', role: 'Admin' });
         } else {
           setError(true);
           setTimeout(() => {

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Deerp Social Hub Admin</title>
+    <style>
+      :root { --bg:#f6f8fb; --card:#fff; --line:#e2e8f0; --ink:#0f172a; --muted:#475569; --brand:#2563eb; }
+      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; margin:0; background:var(--bg); color:var(--ink); }
+      .wrap { max-width: 980px; margin: 24px auto; padding: 0 14px; }
+      .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:14px; }
+      h1 { margin:0 0 8px; font-size:24px; }
+      p { color:var(--muted); margin:4px 0 0; }
+      .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+      input, select { width:100%; box-sizing:border-box; border:1px solid var(--line); border-radius:10px; padding:10px; font-size:14px; }
+      button { border:0; border-radius:10px; padding:10px 12px; background:var(--brand); color:#fff; font-weight:600; cursor:pointer; }
+      button.secondary { background:#0f172a; }
+      button.ghost { background:#fff; border:1px solid var(--line); color:var(--ink); }
+      .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+      table { width:100%; border-collapse: collapse; font-size:13px; }
+      th, td { padding:10px; border-bottom:1px solid var(--line); text-align:left; }
+      .ok { color:#166534; }
+      .err { color:#b91c1c; }
+      @media (max-width: 860px){ .grid { grid-template-columns:1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <h1>Social Hub Admin</h1>
+        <p>Manage platform developer credentials and serve them to Deerp ERP sync clients.</p>
+      </div>
+
+      <div class="card">
+        <div class="grid">
+          <label>
+            <div>Admin API Key</div>
+            <input id="adminKey" type="password" placeholder="ADMIN_API_KEY" />
+          </label>
+          <label>
+            <div>Sync API Key (for ERP)</div>
+            <input id="syncKey" type="password" placeholder="SOCIAL_SYNC_API_KEY" />
+          </label>
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <button class="ghost" onclick="loadApps()">Load Apps</button>
+          <button class="ghost" onclick="testSyncEndpoint()">Test ERP Source URL</button>
+          <span id="status"></span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">Add / Update Credential</h3>
+        <div class="grid">
+          <label>
+            <div>Platform</div>
+            <select id="platform">
+              <option>Facebook</option>
+              <option>Instagram</option>
+              <option>LinkedIn</option>
+              <option>X</option>
+              <option>GoogleBusinessProfile</option>
+            </select>
+          </label>
+          <label>
+            <div>Client ID</div>
+            <input id="clientId" placeholder="Client ID" />
+          </label>
+          <label>
+            <div>Client Secret</div>
+            <input id="clientSecret" placeholder="Client Secret" />
+          </label>
+          <label>
+            <div>Redirect URI</div>
+            <input id="redirectUri" value="http://localhost:5174/social-oauth-callback.html" />
+          </label>
+        </div>
+        <div class="row" style="margin-top:10px;">
+          <label><input id="isActive" type="checkbox" checked /> Active</label>
+          <button onclick="saveApp()">Save Credential</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">Stored Apps</h3>
+        <table>
+          <thead>
+            <tr><th>Platform</th><th>Client ID</th><th>Secret</th><th>Redirect URI</th><th>Active</th><th>Action</th></tr>
+          </thead>
+          <tbody id="appsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      const statusEl = document.getElementById('status');
+
+      const setStatus = (msg, ok = true) => {
+        statusEl.textContent = msg;
+        statusEl.className = ok ? 'ok' : 'err';
+      };
+
+      const adminHeaders = () => ({
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${document.getElementById('adminKey').value}`,
+      });
+
+      async function loadApps() {
+        const res = await fetch('/api/admin/social-apps', { headers: adminHeaders() });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) return setStatus(data.error || 'Failed loading apps', false);
+        const tbody = document.getElementById('appsTable');
+        tbody.innerHTML = '';
+        (data.apps || []).forEach((app) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${app.platform}</td>
+            <td>${app.clientId}</td>
+            <td>${app.clientSecret}</td>
+            <td>${app.redirectUri}</td>
+            <td>${app.isActive ? 'Yes' : 'No'}</td>
+            <td><button class="secondary" onclick="deleteApp('${app.platform}')">Delete</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+        setStatus(`Loaded ${(data.apps || []).length} app(s)`);
+      }
+
+      async function saveApp() {
+        const platform = document.getElementById('platform').value;
+        const body = {
+          clientId: document.getElementById('clientId').value,
+          clientSecret: document.getElementById('clientSecret').value,
+          redirectUri: document.getElementById('redirectUri').value,
+          isActive: document.getElementById('isActive').checked,
+        };
+        const res = await fetch(`/api/admin/social-apps/${encodeURIComponent(platform)}`, {
+          method: 'PUT', headers: adminHeaders(), body: JSON.stringify(body),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) return setStatus(data.error || 'Save failed', false);
+        setStatus(`${platform} credential saved`);
+        await loadApps();
+      }
+
+      async function deleteApp(platform) {
+        const res = await fetch(`/api/admin/social-apps/${encodeURIComponent(platform)}`, {
+          method: 'DELETE', headers: adminHeaders(),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) return setStatus(data.error || 'Delete failed', false);
+        setStatus(`${platform} removed`);
+        await loadApps();
+      }
+
+      async function testSyncEndpoint() {
+        const key = document.getElementById('syncKey').value;
+        const res = await fetch('/api/integration/social-apps', {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) return setStatus(data.error || 'Sync endpoint failed', false);
+        setStatus(`ERP source OK: ${data.count || 0} active app(s)`);
+      }
+    </script>
+  </body>
+</html>

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Boxes, Shield, SlidersHorizontal } from 'lucide-react';
+import { Boxes, Shield, SlidersHorizontal, Share2 } from 'lucide-react';
 import ModuleSettings from './ModuleSettings';
 import AdminPanel from './AdminPanel';
+import SocialAccountsManager from '../components/settings/SocialAccountsManager';
 
 const tabs = [
   { id: 'settings', label: 'Modules', icon: Boxes },
+  { id: 'social', label: 'Social Accounts', icon: Share2 },
   { id: 'admin', label: 'Admin Panel', icon: Shield },
 ];
 
@@ -50,6 +52,11 @@ export default function SettingsAdmin() {
       </section>
 
       {activeTab === 'settings' && <ModuleSettings />}
+      {activeTab === 'social' && (
+        <div className="glass-panel p-5">
+          <SocialAccountsManager />
+        </div>
+      )}
       {activeTab === 'admin' && (
         <div className="glass-panel p-5">
           <AdminPanel />

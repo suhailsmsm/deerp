@@ -24,7 +24,7 @@ export default function AdminPanel() {
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 settings-module">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Super Admin Panel</h1>

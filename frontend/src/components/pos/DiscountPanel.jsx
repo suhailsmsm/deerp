@@ -13,7 +13,7 @@ export default function DiscountPanel({
   const [discountValue, setDiscountValue] = useState('');
   const [discountCode, setDiscountCode] = useState('');
 
-  // Demo promotions
+  // Available promotions
   const promotions = [
     { code: 'SUMMER20', type: 'percentage', value: 20, description: 'Summer Sale - 20% Off', minAmount: 100 },
     { code: 'WELCOME10', type: 'fixed', value: 10, description: 'First Purchase - AED 10 Off', minAmount: 50 },

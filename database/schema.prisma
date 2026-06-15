@@ -201,3 +201,58 @@ model Customer {
   phone   String @unique
   loyalty Int    @default(0)
 }
+
+model Post {
+  id           Int            @id @default(autoincrement())
+  title        String
+  caption      String
+  mediaUrl     String?        @map("media_url")
+  hashtags     String
+  status       String         @default("Draft")
+  createdBy    Int            @map("created_by")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  postPlatforms PostPlatform[]
+
+  @@map("posts")
+}
+
+model Platform {
+  id           Int            @id @default(autoincrement())
+  name         String
+  accessToken  String         @map("access_token")
+  pageId       String?        @map("page_id")
+  postPlatforms PostPlatform[]
+
+  @@map("platforms")
+}
+
+model PostPlatform {
+  postId       Int            @map("post_id")
+  platformId   Int            @map("platform_id")
+  scheduledAt  DateTime?      @map("scheduled_at")
+  publishedAt  DateTime?      @map("published_at")
+  status       String         @default("Draft")
+  errorLog     String?        @map("error_log")
+  reach        Int            @default(0)
+  likes        Int            @default(0)
+  comments     Int            @default(0)
+  shares       Int            @default(0)
+  timezone     String         @default("UTC")
+  post         Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  platform     Platform       @relation(fields: [platformId], references: [id], onDelete: Cascade)
+
+  @@id([postId, platformId])
+  @@map("post_platforms")
+}
+
+model SocialProviderApp {
+  id           Int      @id @default(autoincrement())
+  platform     String   @unique
+  clientId     String   @map("client_id")
+  clientSecret String   @map("client_secret")
+  redirectUri  String   @map("redirect_uri")
+  isActive     Boolean  @default(true) @map("is_active")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("social_provider_apps")
+}

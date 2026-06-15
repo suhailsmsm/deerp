@@ -23,7 +23,7 @@ export default function TableMap({ onSelectTable }) {
   if (!tables.length) {
     return (
       <div className="p-8 bg-white rounded-2xl border border-slate-200 text-slate-500 text-center">
-        No tables available. Add restaurant tables in the back-office or enable demo data.
+        No tables available. Add restaurant tables in the back-office settings.
       </div>
     );
   }
