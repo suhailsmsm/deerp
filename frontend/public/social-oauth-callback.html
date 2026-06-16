@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Social OAuth Callback</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 24px; color: #0f172a; }
+      .box { max-width: 560px; margin: 30px auto; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; }
+      .ok { color: #166534; }
+      .err { color: #b91c1c; }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h2>Completing social account connection...</h2>
+      <p id="status">Please wait.</p>
+    </div>
+
+    <script>
+      (function () {
+        const statusEl = document.getElementById('status');
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        const state = params.get('state');
+        const error = params.get('error_description') || params.get('error');
+
+        if (window.opener && !window.opener.closed) {
+          window.opener.postMessage({ type: 'deerp_social_oauth', code, state, error }, window.location.origin);
+          if (error) {
+            statusEl.className = 'err';
+            statusEl.textContent = 'Authorization failed. You can close this window.';
+          } else if (code) {
+            statusEl.className = 'ok';
+            statusEl.textContent = 'Authorization received. You can close this window.';
+            setTimeout(() => window.close(), 700);
+          } else {
+            statusEl.className = 'err';
+            statusEl.textContent = 'No authorization code received. You can close this window.';
+          }
+        } else {
+          statusEl.className = 'err';
+          statusEl.textContent = 'Parent window not found. Please return to app and retry.';
+        }
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DERPX Ai — Enterprise ERP & POS | By DeLemon Studio</title>
+  <meta name="description" content="DERPX Ai is a modern, all-in-one ERP & POS system built for UAE businesses. By DeLemon Studio." />
+  <link rel="icon" type="image/png" href="/assets/logo.png" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0b1120;
+      color: #e2e8f0;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Navigation ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(11,17,32,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    nav .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #fff;
+    }
+    nav .brand img { height: 32px; width: 32px; border-radius: 8px; }
+    nav .brand span { font-weight: 800; font-size: 18px; letter-spacing: -0.3px; }
+    nav .brand small {
+      font-size: 11px;
+      font-weight: 600;
+      color: #60a5fa;
+      background: rgba(96,165,250,0.12);
+      padding: 2px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
+    }
+    nav .links { display: flex; gap: 24px; align-items: center; }
+    nav .links a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    nav .links a:hover { color: #fff; }
+    nav .links .btn-primary {
+      background: #2563eb;
+      color: #fff;
+      padding: 8px 20px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      transition: background 0.2s, transform 0.2s;
+    }
+    nav .links .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+
+    /* ── Sections ── */
+    section { padding: 100px 24px; max-width: 1200px; margin: 0 auto; }
+
+    /* ── Hero ── */
+    .hero {
+      padding-top: 140px;
+      text-align: center;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 640px; height: 640px;
+      background: radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(96,165,250,0.10);
+      border: 1px solid rgba(96,165,250,0.18);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #93c5fd;
+      margin-bottom: 24px;
+    }
+    .hero .badge span { color: #60a5fa; }
+    .hero h1 {
+      font-size: clamp(2.6rem, 7vw, 4.2rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1.5px;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .hero h1 span { background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p {
+      font-size: 1.15rem;
+      color: #94a3b8;
+      max-width: 640px;
+      margin: 0 auto 36px;
+    }
+    .hero .actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .hero .actions a {
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .hero .actions a:hover { transform: translateY(-2px); }
+    .hero .actions .primary {
+      background: #2563eb;
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(37,99,235,0.35);
+    }
+    .hero .actions .secondary {
+      background: rgba(255,255,255,0.06);
+      color: #e2e8f0;
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+
+    /* ── Screenshot ── */
+    .screenshot-wrapper {
+      margin-top: 60px;
+      position: relative;
+    }
+    .screenshot-wrapper::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(37,99,235,0.3), rgba(139,92,246,0.3), transparent);
+      z-index: -1;
+    }
+    .screenshot {
+      width: 100%;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+      background: #0f172a;
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      font-size: 14px;
+      overflow: hidden;
+      position: relative;
+    }
+    .screenshot img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ── Section titles ── */
+    .section-label {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #60a5fa;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+    .section-sub {
+      color: #94a3b8;
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin-bottom: 48px;
+    }
+
+    /* ── Features grid ── */
+    .features { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+    .feature-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 28px 24px;
+      transition: background 0.25s, transform 0.25s, border-color 0.25s;
+    }
+    .feature-card:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(96,165,250,0.2);
+      transform: translateY(-4px);
+    }
+    .feature-card .icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+    .feature-card h3 { font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: #94a3b8; line-height: 1.6; }
+
+    /* ── Modules ── */
+    .modules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+    .module-chip {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 18px 16px;
+      text-align: center;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .module-chip:hover { background: rgba(96,165,250,0.08); border-color: rgba(96,165,250,0.2); }
+    .module-chip .emoji { font-size: 28px; margin-bottom: 8px; display: block; }
+    .module-chip span { font-size: 14px; font-weight: 600; color: #e2e8f0; }
+
+    /* ── Tech stack ── */
+    .tech-stack { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .tech-stack span {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.07);
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #cbd5e1;
+    }
+
+    /* ── Studio section ── */
+    .studio-section {
+      text-align: center;
+      background: linear-gradient(135deg, rgba(37,99,235,0.06), rgba(139,92,246,0.06));
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 24px;
+      padding: 64px 32px;
+    }
+    .studio-section .logo-lg { font-size: 48px; margin-bottom: 12px; }
+    .studio-section h2 { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .studio-section h2 span { color: #facc15; }
+    .studio-section p { color: #94a3b8; max-width: 520px; margin: 0 auto 28px; font-size: 15px; }
+
+    /* ── CTA ── */
+    .cta-section {
+      text-align: center;
+      background: linear-gradient(135deg, rgba(37,99,235,0.10), rgba(139,92,246,0.10));
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 24px;
+      padding: 72px 32px;
+    }
+    .cta-section h2 { font-size: 30px; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .cta-section p { color: #94a3b8; margin-bottom: 32px; font-size: 16px; }
+    .cta-section .btn-big {
+      display: inline-block;
+      background: #2563eb;
+      color: #fff;
+      padding: 16px 40px;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 16px;
+      text-decoration: none;
+      box-shadow: 0 6px 32px rgba(37,99,235,0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cta-section .btn-big:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(37,99,235,0.4); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      color: #475569;
+      font-size: 13px;
+    }
+    footer strong { color: #facc15; }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      nav .links a:not(.btn-primary) { display: none; }
+      section { padding: 72px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="#" class="brand">
+      <img src="/assets/logo.png" alt="DERPX Ai" />
+      <span>DERPX Ai</span>
+      <small>BETA</small>
+    </a>
+    <div class="links">
+      <a href="#features">Features</a>
+      <a href="#modules">Modules</a>
+      <a href="#tech">Tech</a>
+      <a href="#studio" class="btn-primary">By DeLemon Studio</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="badge">🚀 <span>Now in Beta</span> — Built for UAE businesses</div>
+    <h1>
+      The All-in-One<br />
+      <span>ERP &amp; POS</span> Platform
+    </h1>
+    <p>
+      DERPX Ai unifies point of sale, inventory, accounting, HR, CRM, and AI-powered
+      insights into one blazing-fast system. Designed for the UAE market.
+    </p>
+    <div class="actions">
+      <a href="#demo" class="primary">🚀 Request Demo</a>
+      <a href="#features" class="secondary">Explore Features ↓</a>
+    </div>
+    <div class="screenshot-wrapper">
+      <div class="screenshot">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:16px;opacity:0.6;">
+          <div style="font-size:48px;">🖥️</div>
+          <div style="color:#64748b;font-size:14px;font-weight:500;">Dashboard Preview</div>
+          <div style="display:flex;gap:8px;">
+            <span style="background:rgba(37,99,235,0.15);padding:4px 12px;border-radius:6px;font-size:12px;color:#60a5fa;">POS</span>
+            <span style="background:rgba(16,185,129,0.15);padding:4px 12px;border-radius:6px;font-size:12px;color:#34d399;">Inventory</span>
+            <span style="background:rgba(139,92,246,0.15);padding:4px 12px;border-radius:6px;font-size:12px;color:#a78bfa;">Analytics</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features">
+    <div class="section-label">Built for speed</div>
+    <h2 class="section-title">Everything you need to run your business</h2>
+    <p class="section-sub">
+      From quick counter sales to complex multi-branch operations — DERPX Ai covers every workflow.
+    </p>
+    <div class="features">
+      <div class="feature-card">
+        <div class="icon" style="background:rgba(37,99,235,0.12);">⚡</div>
+        <h3>Lightning POS</h3>
+        <p>Scan barcodes, split bills, apply discounts, and accept multiple payment methods in seconds.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon" style="background:rgba(16,185,129,0.12);">📦</div>
+        <h3>Smart Inventory</h3>
+        <p>Track stock across warehouses, manage batches &amp; expiry, auto-reorder at min levels.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon" style="background:rgba(139,92,246,0.12);">💰</div>
+        <h3>Double-Entry Accounting</h3>
+        <p>Full ledger, chart of accounts, P&amp;L, balance sheet, and UAE VAT-compliant reports.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon" style="background:rgba(245,158,11,0.12);">👥</div>
+        <h3>CRM &amp; Loyalty</h3>
+        <p>Customer profiles, purchase history, WhatsApp integration, loyalty tiers &amp; promotions.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon" style="background:rgba(236,72,153,0.12);">📋</div>
+        <h3>HR &amp; Payroll</h3>
+        <p>Employee profiles, attendance, WPS payroll export, leave management, visa/Emirates ID alerts.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon" style="background:rgba(59,130,246,0.12);">🤖</div>
+        <h3>AI Insights</h3>
+        <p>Sales forecasting, demand prediction, smart recommendations, and automated reports.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon" style="background:rgba(251,191,36,0.12);">📱</div>
+        <h3>Mobile App</h3>
+        <p>Native POS mobile app with offline mode, barcode scanning, and Bluetooth receipt printing.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon" style="background:rgba(52,211,153,0.12);">🔌</div>
+        <h3>Integrations</h3>
+        <p>Stripe, Tabby, Tamara, WhatsApp, SMS gateways, Shopify, WooCommerce, and more.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modules -->
+  <section id="modules">
+    <div class="section-label">Full ERP Suite</div>
+    <h2 class="section-title">18+ integrated modules</h2>
+    <p class="section-sub">Each module works independently or together as a unified system.</p>
+    <div class="modules-grid">
+      <div class="module-chip"><span class="emoji">🛒</span><span>Point of Sale</span></div>
+      <div class="module-chip"><span class="emoji">📦</span><span>Inventory</span></div>
+      <div class="module-chip"><span class="emoji">📊</span><span>Accounting</span></div>
+      <div class="module-chip"><span class="emoji">👥</span><span>CRM</span></div>
+      <div class="module-chip"><span class="emoji">🎁</span><span>Loyalty</span></div>
+      <div class="module-chip"><span class="emoji">📋</span><span>HR &amp; Payroll</span></div>
+      <div class="module-chip"><span class="emoji">🚚</span><span>Procurement</span></div>
+      <div class="module-chip"><span class="emoji">🏗️</span><span>Projects</span></div>
+      <div class="module-chip"><span class="emoji">🍽️</span><span>F&amp;B Module</span></div>
+      <div class="module-chip"><span class="emoji">🏦</span><span>PDC &amp; Banking</span></div>
+      <div class="module-chip"><span class="emoji">🧾</span><span>VAT Returns</span></div>
+      <div class="module-chip"><span class="emoji">🏢</span><span>Multi-Branch</span></div>
+      <div class="module-chip"><span class="emoji">🤖</span><span>AI Insights</span></div>
+      <div class="module-chip"><span class="emoji">📱</span><span>Mobile POS</span></div>
+      <div class="module-chip"><span class="emoji">💬</span><span>WhatsApp</span></div>
+      <div class="module-chip"><span class="emoji">📈</span><span>Reports</span></div>
+      <div class="module-chip"><span class="emoji">🛡️</span><span>Staff Shifts</span></div>
+      <div class="module-chip"><span class="emoji">⚙️</span><span>Settings</span></div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section id="tech">
+    <div class="section-label">Modern Stack</div>
+    <h2 class="section-title">Built with cutting-edge technology</h2>
+    <p class="section-sub">Performance, scalability, and security from day one.</p>
+    <div class="tech-stack">
+      <span>React 18</span>
+      <span>TypeScript</span>
+      <span>Tailwind CSS</span>
+      <span>Vite</span>
+      <span>Zustand</span>
+      <span>Node.js</span>
+      <span>Express</span>
+      <span>Prisma ORM</span>
+      <span>SQLite</span>
+      <span>PostgreSQL</span>
+      <span>Redis</span>
+      <span>Electron</span>
+      <span>React Native</span>
+      <span>Expo</span>
+      <span>JWT</span>
+      <span>REST API</span>
+    </div>
+  </section>
+
+  <!-- By DeLemon Studio -->
+  <section id="studio">
+    <div class="studio-section">
+      <div class="logo-lg">🍋</div>
+      <h2>Crafted by <span>DeLemon Studio</span></h2>
+      <p>
+        DeLemon Studio is a digital product agency that designs and builds
+        high-performance web &amp; mobile applications for businesses in the
+        UAE and beyond. DERPX Ai is our flagship enterprise product.
+      </p>
+      <div style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-top:8px;">
+        <div>
+          <div style="font-size:32px;font-weight:800;color:#fff;">50+</div>
+          <div style="font-size:13px;color:#94a3b8;">Projects Delivered</div>
+        </div>
+        <div>
+          <div style="font-size:32px;font-weight:800;color:#fff;">4+</div>
+          <div style="font-size:13px;color:#94a3b8;">Years Experience</div>
+        </div>
+        <div>
+          <div style="font-size:32px;font-weight:800;color:#fff;">12</div>
+          <div style="font-size:13px;color:#94a3b8;">Team Members</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="demo">
+    <div class="cta-section">
+      <h2>Ready to transform your business?</h2>
+      <p>Get a personalized demo of DERPX Ai. See how it fits your workflow.</p>
+      <a href="mailto:hello@delemon.studio" class="btn-big">📧 hello@delemon.studio</a>
+      <div style="margin-top:20px;font-size:13px;color:#64748b;">
+        Or visit <strong style="color:#facc15;">delemon.studio</strong> to see our other work
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 <strong>DeLemon Studio</strong> — DERPX Ai is a product of DeLemon Studio. All rights reserved.</p>
+    <p style="margin-top:6px;">Built with ❤️ in the UAE</p>
+  </footer>
+
+</body>
+</html>

@@ -1,200 +1,188 @@
-import React, { useEffect, useState } from 'react';
+/**
+ * DerpX POS - Main App Entry Point
+ */
+
+import React, { useEffect } from 'react';
+import { StyleSheet, View, Text, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ActivityIndicator, View } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from './src/store/authStore';
 import { useSettingsStore } from './src/store/settingsStore';
+import { navigationDarkTheme, navigationLightTheme, darkColors, lightColors } from './src/constants/theme';
 
-import { LoginScreen } from './src/screens/Auth/LoginScreen';
-import PosScreen from './src/screens/POS/PosScreen';
-import { ProductsScreen } from './src/screens/POS/ProductsScreen';
-import { CartScreen } from './src/screens/POS/CartScreen';
-import { CheckoutScreen } from './src/screens/POS/CheckoutScreen';
-import { ReceiptScreen } from './src/screens/POS/ReceiptScreen';
-import CrmScreen from './src/screens/CRM/CrmScreen';
-import { CustomerDetailScreen } from './src/screens/CRM/CustomerDetailScreen';
-import { CreateOrderScreen } from './src/screens/CRM/CreateOrderScreen';
-import SettingsScreen from './src/screens/SettingsScreen';
+// Auth Screen
+import LoginScreen from './src/screens/auth/LoginScreen';
+
+// POS Screens
+import POSScreen from './src/screens/pos/POSScreen';
+import CartScreen from './src/screens/pos/CartScreen';
+import CheckoutScreen from './src/screens/pos/CheckoutScreen';
+import ScannerScreen from './src/screens/pos/ScannerScreen';
+import ReceiptScreen from './src/screens/pos/ReceiptScreen';
+import WishlistScreen from './src/screens/pos/WishlistScreen';
+
+// Sales Screen
+import SalesScreen from './src/screens/sales/SalesScreen';
+
+// CRM Screen
+import CRMScreen from './src/screens/crm/CRMScreen';
+
+// Inventory Screen
+import InventoryScreen from './src/screens/inventory/InventoryScreen';
+
+// Settings Screen
+import SettingsScreen from './src/screens/settings/SettingsScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function PosStack() {
+// POS Stack Navigator
+function POSStack() {
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: true,
-        headerStyle: { backgroundColor: '#0f172a', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)' },
-        headerTitleStyle: { fontSize: 18, fontWeight: '700', color: '#fff' },
-        headerTintColor: '#3b82f6',
+        headerStyle: {
+          backgroundColor: darkColors.background,
+        },
+        headerTitleStyle: {
+          fontSize: 18,
+          fontWeight: '700',
+          color: darkColors.text,
+        },
       }}
     >
-      <Stack.Screen
-        name="Products"
-        component={ProductsScreen}
-        options={{ title: 'Products' }}
-      />
-      <Stack.Screen
-        name="Cart"
-        component={CartScreen}
-        options={{ title: 'Shopping Cart' }}
-      />
-      <Stack.Screen
-        name="Checkout"
-        component={CheckoutScreen}
-        options={{ title: 'Checkout' }}
-      />
-      <Stack.Screen
-        name="Receipt"
-        component={ReceiptScreen}
-        options={{ title: 'Receipt' }}
-      />
+      <Stack.Screen name="POSHome" component={POSScreen} options={{ title: 'POS', headerShown: false }} />
+      <Stack.Screen name="Cart" component={CartScreen} options={{ title: 'Shopping Cart' }} />
+      <Stack.Screen name="Wishlist" component={WishlistScreen} options={{ title: 'Wishlist' }} />
+      <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ title: 'Checkout' }} />
+      <Stack.Screen name="Scanner" component={ScannerScreen} options={{ title: 'Scan Barcode', headerShown: false }} />
+      <Stack.Screen name="Receipt" component={ReceiptScreen} options={{ title: 'Receipt' }} />
     </Stack.Navigator>
   );
 }
 
-function CrmStack() {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: true,
-        headerStyle: { backgroundColor: '#0f172a', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)' },
-        headerTitleStyle: { fontSize: 18, fontWeight: '700', color: '#fff' },
-        headerTintColor: '#3b82f6',
-      }}
-    >
-      <Stack.Screen
-        name="Customers"
-        component={CrmScreen}
-        options={{ title: 'Customers' }}
-      />
-      <Stack.Screen
-        name="CustomerDetail"
-        component={CustomerDetailScreen}
-        options={{ title: 'Customer Details', headerBackTitle: 'Back' }}
-      />
-      <Stack.Screen
-        name="CreateOrder"
-        component={CreateOrderScreen}
-        options={{ title: 'New Order', headerBackTitle: 'Back' }}
-      />
-    </Stack.Navigator>
-  );
-}
-
-function SettingsStack() {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: true,
-        headerStyle: { backgroundColor: '#0f172a', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)' },
-        headerTitleStyle: { fontSize: 18, fontWeight: '700', color: '#fff' },
-        headerTintColor: '#3b82f6',
-      }}
-    >
-      <Stack.Screen
-        name="SettingsHome"
-        component={SettingsScreen}
-        options={{ title: 'Settings' }}
-      />
-    </Stack.Navigator>
-  );
-}
-
+// Main App Tab Navigator
 function MainApp() {
+  const { theme: themeMode } = useSettingsStore();
+  const colors = themeMode === 'dark' ? darkColors : lightColors;
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#3b82f6',
-        tabBarInactiveTintColor: '#64748b',
-        tabBarLabelStyle: { fontSize: 13, fontWeight: '700' },
-        tabBarLabelPosition: 'beside-icon',
-        tabBarStyle: { height: 68, paddingHorizontal: 12, backgroundColor: '#0f172a', borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },
-        tabBarItemStyle: { paddingHorizontal: 8, justifyContent: 'flex-start', alignItems: 'center' },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
+        tabBarStyle: {
+          backgroundColor: colors.glass || colors.surface,
+          borderTopWidth: 1,
+          borderTopColor: colors.border,
+          height: 72,
+          paddingBottom: 8,
+          paddingTop: 8,
+          shadowColor: colors.shadow,
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 12,
+          elevation: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+        },
+        tabBarItemStyle: {
+          paddingVertical: 4,
+        },
       }}
     >
       <Tab.Screen
-        name="POSTab"
-        component={PosStack}
+        name="POS"
+        component={POSStack}
         options={{
-          tabBarLabel: 'POS',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cart-outline" size={20} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" size={size} color={color} />,
         }}
       />
       <Tab.Screen
-        name="CRMTab"
-        component={CrmStack}
+        name="Sales"
+        component={SalesScreen}
         options={{
-          tabBarLabel: 'CRM',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people-outline" size={20} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="receipt-outline" size={size} color={color} />,
         }}
       />
       <Tab.Screen
-        name="SettingsTab"
-        component={SettingsStack}
+        name="CRM"
+        component={CRMScreen}
         options={{
-          tabBarLabel: 'Settings',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings-outline" size={20} color={color} />
-          ),
+          tabBarIcon: ({ color, size }) => <Ionicons name="people-outline" size={size} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="Inventory"
+        component={InventoryScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => <Ionicons name="cube-outline" size={size} color={color} />,
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
         }}
       />
     </Tab.Navigator>
   );
 }
 
-export default function App() {
-  const [isReady, setIsReady] = useState(false);
-  const { restoreSession, user } = useAuthStore();
-  const { loadLocalSettings } = useSettingsStore();
+// Root Navigator
+function RootNavigator() {
+  const { isAuthenticated, isLoading, initialize } = useAuthStore();
+  const { theme: themeMode } = useSettingsStore();
+  const navigationTheme = themeMode === 'dark' ? navigationDarkTheme : navigationLightTheme;
 
+  // Initialize auth state on mount
   useEffect(() => {
-    const bootstrap = async () => {
-      try {
-        await loadLocalSettings();
-        const hasSession = await restoreSession();
-      } catch (error) {
-        console.error('Bootstrap error:', error);
-      } finally {
-        setIsReady(true);
-      }
-    };
-
-    bootstrap();
+    initialize();
   }, []);
 
-  if (!isReady) {
+  if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={darkColors.primary} />
+        <Text style={styles.loadingText}>Loading DerpX POS...</Text>
       </View>
     );
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{ headerShown: false }}
-        initialRouteName={user ? 'MainApp' : 'Auth'}
-      >
-        <Stack.Screen
-          name="Auth"
-          component={LoginScreen}
-          options={{ animation: 'none' }}
-        />
-        <Stack.Screen
-          name="MainApp"
-          component={MainApp}
-          options={{ animation: 'none' }}
-        />
+    <NavigationContainer theme={navigationTheme}>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {isAuthenticated ? (
+          <Stack.Screen name="MainApp" component={MainApp} />
+        ) : (
+          <Stack.Screen name="Login" component={LoginScreen} />
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+
+export default function App() {
+  return <RootNavigator />;
+}
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: darkColors.background,
+  },
+  loadingText: {
+    color: darkColors.text,
+    marginTop: 16,
+    fontSize: 14,
+  },
+});

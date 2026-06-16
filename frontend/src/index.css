@@ -1,0 +1,615 @@
+/* Import app.css utilities */
+@import './app.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background: #faffff !important;
+    color: #0f172a;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  body.dark {
+    background: #0f1012 !important;
+    color: #fff;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    letter-spacing: 0;
+  }
+}
+
+/* Force light green background for main container */
+body,
+html {
+  background-color: #faffff !important;
+}
+
+/* Dark mode overrides - Webflow-inspired dark theme */
+html.dark,
+html.dark body {
+  background-color: #0f1012 !important;
+}
+
+/* Sidebar exclusions - Webflow dark theme */
+html.dark aside {
+  background-color: #0f1012 !important;
+  border: none !important;
+}
+
+html.dark aside button,
+html.dark aside div,
+html.dark aside nav {
+  border: none !important;
+}
+
+html.dark aside * {
+  border: none !important;
+}
+
+/* Collapsed sidebar styling */
+html.dark aside.w-20 {
+  background-color: #0f1012 !important;
+}
+
+html.dark aside.w-20 button {
+  background-color: #1a1b1e !important;
+}
+
+html.dark aside.w-20 .text-slate-400 {
+  color: #a0a0a0 !important;
+}
+
+html.dark aside.w-20 .hover\\:text-\\[\\#80cd82\\]:hover {
+  color: #8b5cf6 !important;
+}
+
+html.dark aside .bg-slate-900 {
+  background-color: #0f1012 !important;
+}
+
+html.dark aside .bg-slate-800 {
+  background-color: #1a1b1e !important;
+}
+
+html.dark aside .text-slate-400 {
+  color: #a0a0a0 !important;
+}
+
+html.dark aside .text-slate-500 {
+  color: #808080 !important;
+}
+
+html.dark aside .text-slate-200 {
+  color: #e0e0e0 !important;
+}
+
+/* Force white text for all sidebar items in dark mode */
+html.dark aside button,
+html.dark aside span,
+html.dark aside .font-medium,
+html.dark aside .text-slate-400,
+html.dark aside .text-slate-500,
+html.dark aside .text-slate-300,
+html.dark aside .text-slate-200 {
+  color: #ffffff !important;
+}
+
+/* Force white icons in sidebar (dark mode) */
+html.dark aside svg,
+html.dark aside .lucide,
+html.dark aside [class*="lucide-"] {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Active item styling - violet accent */
+html.dark aside .bg-\[\#80cd82\] {
+  background-color: #8b5cf6 !important;
+}
+
+html.dark aside .bg-\[\#80cd82\] text-\[\#080056\],
+html.dark aside .bg-\[\#80cd82\] * {
+  color: #ffffff !important;
+}
+
+html.dark aside .bg-\[\#80cd82\] svg,
+html.dark aside .bg-\[\#80cd82\] .lucide {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Remove ALL borders from sidebar in dark mode - comprehensive */
+html.dark aside,
+html.dark aside *,
+html.dark aside .border,
+html.dark aside .border-0,
+html.dark aside .border-2,
+html.dark aside .border-t,
+html.dark aside .border-b,
+html.dark aside .border-l,
+html.dark aside .border-r,
+html.dark aside .border-x,
+html.dark aside .border-y,
+html.dark aside .border-slate-100,
+html.dark aside .border-slate-200,
+html.dark aside .border-slate-300,
+html.dark aside .border-slate-400,
+html.dark aside .border-slate-500,
+html.dark aside .border-slate-600,
+html.dark aside .border-slate-700,
+html.dark aside .border-slate-800,
+html.dark aside .border-white,
+html.dark aside button,
+html.dark aside .rounded-xl,
+html.dark aside .rounded-lg,
+html.dark aside .rounded-2xl {
+  border: none !important;
+  border-width: 0 !important;
+  border-color: transparent !important;
+  border-top-width: 0 !important;
+  border-bottom-width: 0 !important;
+  border-left-width: 0 !important;
+  border-right-width: 0 !important;
+}
+
+html.dark aside .bg-\[\#80cd82\] {
+  background-color: #80cd82 !important;
+}
+
+html.dark aside .text-\[\#080056\] {
+  color: #080056 !important;
+}
+
+html.dark aside .text-\[\#80cd82\] {
+  color: #80cd82 !important;
+}
+
+html.dark aside .text-white {
+  color: #ffffff !important;
+}
+
+html.dark main,
+html.dark .flex-1,
+html.dark .flex,
+html.dark .bg-white,
+html.dark .bg-slate-50,
+html.dark .bg-slate-100,
+html.dark .bg-slate-200 {
+  background-color: #1a1b1e !important;
+  border-color: #2a2b2e !important;
+}
+
+/* Settings module keeps its original light-mode gradient backgrounds in dark mode */
+
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background: #25262a !important;
+  border-color: #3a3b3e !important;
+  color: #fff !important;
+}
+
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6,
+html.dark .text-xl,
+html.dark .text-2xl,
+html.dark .text-3xl,
+html.dark .font-bold,
+html.dark .font-semibold,
+html.dark .font-medium {
+  color: #fff !important;
+}
+
+html.dark .text-slate-500,
+html.dark .text-slate-600,
+html.dark .text-slate-700,
+html.dark .text-slate-800,
+html.dark .text-slate-900,
+html.dark .text-slate-950 {
+  color: #e2e8f0 !important;
+}
+
+html.dark .text-slate-400,
+html.dark .text-slate-300 {
+  color: #e2e8f0 !important;
+}
+
+/* Green accent for icons in dark mode (except settings icon backgrounds) */
+html.dark .lucide,
+html.dark svg.lucide,
+html.dark [class*="lucide-"],
+html.dark .icon,
+html.dark main svg {
+  color: #80cd82 !important;
+  stroke: #80cd82 !important;
+}
+
+/* Settings module - keep icon backgrounds as light mode colors (including gradients) */
+html.dark .settings-module .icon-bg,
+html.dark .settings-module .rounded-2xl[class*="bg-"],
+html.dark .settings-module .rounded-2xl.bg-gradient-to-br,
+html.dark .settings-module .rounded-2xl[class*="from-"],
+html.dark .settings-module .rounded-2xl[class*="to-"],
+html.dark .settings-module .shadow-slate-300\/50 {
+  /* Preserve original gradient colors */
+  background-color: unset !important;
+  background-image: unset !important;
+}
+
+/* Force preserve gradient backgrounds in settings module */
+html.dark .settings-module .rounded-2xl.bg-gradient-to-br {
+  background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)) !important;
+}
+
+/* Preserve specific gradient combinations in settings - all colors */
+html.dark .settings-module .from-rose-500 {
+  --tw-gradient-from: #f43f5e !important;
+  --tw-gradient-to: rgb(244 63 94 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.dark .settings-module .to-orange-500 {
+  --tw-gradient-to: #f97316 !important;
+}
+
+html.dark .settings-module .from-blue-500 {
+  --tw-gradient-from: #3b82f6 !important;
+  --tw-gradient-to: rgb(59 130 246 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.dark .settings-module .from-emerald-500 {
+  --tw-gradient-from: #10b981 !important;
+  --tw-gradient-to: rgb(16 185 129 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.dark .settings-module .from-purple-500 {
+  --tw-gradient-from: #a855f7 !important;
+  --tw-gradient-to: rgb(168 85 247 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.dark .settings-module .from-amber-500 {
+  --tw-gradient-from: #f59e0b !important;
+  --tw-gradient-to: rgb(245 158 11 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.dark .settings-module .from-pink-500 {
+  --tw-gradient-from: #ec4899 !important;
+  --tw-gradient-to: rgb(236 72 153 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.dark .settings-module .from-indigo-500 {
+  --tw-gradient-from: #6366f1 !important;
+  --tw-gradient-to: rgb(99 102 241 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.dark .settings-module .from-teal-500 {
+  --tw-gradient-from: #14b8a6 !important;
+  --tw-gradient-to: rgb(20 184 166 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.dark .settings-module .from-cyan-500 {
+  --tw-gradient-from: #06b6d4 !important;
+  --tw-gradient-to: rgb(6 182 212 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+html.dark .settings-module .from-lime-500 {
+  --tw-gradient-from: #84cc16 !important;
+  --tw-gradient-to: rgb(132 204 22 / 0) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+/* Remove shadows from settings module icons in dark mode */
+html.dark .settings-module .shadow-lg,
+html.dark .settings-module .shadow-slate-300\/50,
+html.dark .settings-module .rounded-2xl[class*="bg-"],
+html.dark .settings-module .rounded-2xl.bg-gradient-to-br {
+  --tw-shadow: 0 0 #0000 !important;
+  --tw-shadow-colored: 0 0 #0000 !important;
+  box-shadow: 0 0 #0000 !important;
+}
+
+/* Force white icon color in settings module (dark mode) */
+html.dark .settings-module .rounded-2xl[class*="bg-"] svg,
+html.dark .settings-module .rounded-2xl[class*="bg-"] .lucide,
+html.dark .settings-module .bg-gradient-to-br svg,
+html.dark .settings-module .bg-gradient-to-br .lucide {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+html.dark .border:not(.border-0),
+html.dark .border-2:not(.border-0),
+html.dark .border-t:not(.border-t-0),
+html.dark .border-b:not(.border-b-0),
+html.dark .border-l:not(.border-l-0),
+html.dark .border-r:not(.border-r-0),
+html.dark .border-x:not(.border-x-0),
+html.dark .border-y:not(.border-y-0),
+html.dark .border-slate-100:not(.border-0),
+html.dark .border-slate-200:not(.border-0),
+html.dark .border-slate-300:not(.border-0),
+html.dark .border-slate-400:not(.border-0),
+html.dark .border-slate-500:not(.border-0),
+html.dark .border-white:not(.border-0),
+html.dark .shadow-sm,
+html.dark .shadow,
+html.dark .shadow-md,
+html.dark .shadow-lg,
+html.dark .shadow-xl,
+html.dark .shadow-2xl {
+  border-color: #2a2b2e !important;
+  border-width: 1px !important;
+  border-style: solid !important;
+}
+
+html.dark .border-t:not(.border-t-0),
+html.dark .border-t-2:not(.border-t-0) {
+  border-top-width: 1px !important;
+  border-top-style: solid !important;
+  border-top-color: #2a2b2e !important;
+}
+
+html.dark .border-b:not(.border-b-0),
+html.dark .border-b-2:not(.border-b-0) {
+  border-bottom-width: 1px !important;
+  border-bottom-style: solid !important;
+  border-bottom-color: #2a2b2e !important;
+}
+
+html.dark .border-l:not(.border-l-0),
+html.dark .border-l-2:not(.border-l-0) {
+  border-left-width: 1px !important;
+  border-left-style: solid !important;
+  border-left-color: #2a2b2e !important;
+}
+
+html.dark .border-r:not(.border-r-0),
+html.dark .border-r-2:not(.border-r-0) {
+  border-right-width: 1px !important;
+  border-right-style: solid !important;
+  border-right-color: #2a2b2e !important;
+}
+
+html.dark .border-x:not(.border-x-0) {
+  border-left-width: 1px !important;
+  border-left-style: solid !important;
+  border-left-color: #2a2b2e !important;
+  border-right-width: 1px !important;
+  border-right-style: solid !important;
+  border-right-color: #2a2b2e !important;
+}
+
+html.dark .border-y:not(.border-y-0) {
+  border-top-width: 1px !important;
+  border-top-style: solid !important;
+  border-top-color: #2a2b2e !important;
+  border-bottom-width: 1px !important;
+  border-bottom-style: solid !important;
+  border-bottom-color: #2a2b2e !important;
+}
+
+html.dark .rounded-2xl:not(.border-0),
+html.dark .rounded-xl:not(.border-0),
+html.dark .rounded-lg:not(.border-0),
+html.dark .rounded-md:not(.border-0),
+html.dark .rounded-\[1\.5rem\]:not(.border-0),
+html.dark .rounded-\[1rem\]:not(.border-0),
+html.dark .rounded-\[0\.5rem\]:not(.border-0) {
+  background: #1a1b1e !important;
+  border: 1px solid #2a2b2e !important;
+}
+
+html.dark table,
+html.dark thead,
+html.dark tbody,
+html.dark tr,
+html.dark td,
+html.dark th {
+  background: #1a1b1e !important;
+  border-color: #2a2b2e !important;
+}
+
+html.dark .divide-y > * + *,
+html.dark .divide-x > * + * {
+  border-color: #2a2b2e !important;
+}
+
+/* Remove divide borders in sidebar */
+html.dark aside .divide-y > * + *,
+html.dark aside .divide-x > * + * {
+  border: none !important;
+  border-width: 0 !important;
+}
+
+/* POS screen specific ring fixes */
+html.dark .ring,
+html.dark .ring-1,
+html.dark .ring-2,
+html.dark .ring-slate-200,
+html.dark .ring-slate-300,
+html.dark .ring-slate-400 {
+  --tw-ring-color: #00291f !important;
+}
+
+@layer components {
+  .app-glass-shell {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+  }
+
+  .glass-panel {
+    border-radius: 1.5rem;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+  }
+
+  .module-card {
+    border-radius: 1.5rem;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    padding: 1.25rem;
+    transition: transform 160ms ease, border-color 160ms ease;
+  }
+
+  .module-card:hover {
+    transform: translateY(-2px);
+    border-color: #80cd82;
+  }
+}
+
+/* Dark mode component overrides - Webflow-inspired */
+html.dark .app-glass-shell,
+html.dark .glass-panel,
+html.dark .module-card,
+html.dark .rounded-3xl,
+html.dark .rounded-\[2rem\],
+html.dark .rounded-\[3rem\] {
+  background: #1a1b1e !important;
+  border: 1px solid #2a2b2e !important;
+}
+
+html.dark .module-card:hover {
+  border-color: #8b5cf6 !important;
+}
+
+/* Dark mode - component backgrounds */
+html.dark .bg-white,
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 {
+  background-color: #1a1b1e !important;
+}
+
+html.dark .ring-1,
+html.dark .ring-slate-200\/70 {
+  --tw-ring-color: #2a2b2e !important;
+  border-color: #2a2b2e !important;
+}
+
+html.dark .shadow-sm {
+  --tw-shadow-color: #0a0a0c !important;
+}
+
+/* Violet accent for dark mode */
+html.dark .text-blue-600,
+html.dark .text-blue-700,
+html.dark .text-indigo-600 {
+  color: #8b5cf6 !important;
+}
+
+html.dark .bg-blue-600 {
+  background-color: #8b5cf6 !important;
+}
+
+html.dark .border-blue-100 {
+  border-color: #8b5cf6 !important;
+}
+
+/* Main content area styling - light mode only */
+html:not(.dark) main .bg-white,
+html:not(.dark) main .bg-slate-50,
+html:not(.dark) main .bg-slate-100 {
+  background: #fff !important;
+  border-color: #e2e8f0 !important;
+}
+
+html:not(.dark) main table .bg-slate-50,
+html:not(.dark) main thead.bg-slate-100 {
+  background: #fff !important;
+}
+
+html:not(.dark) main input,
+html:not(.dark) main select,
+html:not(.dark) main textarea {
+  background: #fff !important;
+  border-color: #e2e8f0 !important;
+}
+
+html:not(.dark) main .border,
+html:not(.dark) main .border-t,
+html:not(.dark) main .border-b,
+html:not(.dark) main .border-l,
+html:not(.dark) main .border-r,
+html:not(.dark) main .border-slate-100,
+html:not(.dark) main .border-slate-200,
+html:not(.dark) main .border-slate-300 {
+  border-color: #e2e8f0 !important;
+}
+
+/* Accent color for icons and small elements - light mode */
+html:not(.dark) main .text-blue-600,
+html:not(.dark) main .text-blue-700 {
+  color: #80cd82 !important;
+}
+
+html:not(.dark) main .bg-blue-600 {
+  background: #80cd82 !important;
+}
+
+html:not(.dark) main .border-blue-100 {
+  border-color: #80cd82 !important;
+}
+
+/* Dark mode accent colors */
+html.dark .text-blue-600,
+html.dark .text-blue-700 {
+  color: #80cd82 !important;
+}
+
+html.dark .bg-blue-600 {
+  background: #80cd82 !important;
+}
+
+html.dark .border-blue-100 {
+  border-color: #80cd82 !important;
+}
+
+html.dark .text-\[\#080056\],
+html.dark .text-\[\#0E0E52\] {
+  color: #05051a !important;
+}
+
+html.dark .text-\[\#80cd82\] {
+  color: #80cd82 !important;
+}
+
+/* Additional green accents for dark mode UI elements */
+html.dark .text-emerald-600,
+html.dark .text-emerald-700,
+html.dark .text-green-600,
+html.dark .text-blue-500,
+html.dark .text-blue-600,
+html.dark .text-indigo-600 {
+  color: #80cd82 !important;
+}
+
+html.dark .bg-emerald-600,
+html.dark .bg-green-600,
+html.dark .bg-blue-600 {
+  background-color: #80cd82 !important;
+}
+
+/* Card and panel accents in dark mode */
+html.dark .module-card .text-slate-900,
+html.dark .glass-panel .text-slate-900,
+html.dark .card .text-slate-900 {
+  color: #80cd82 !important;
+}

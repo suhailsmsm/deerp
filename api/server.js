@@ -7,6 +7,8 @@ const authRoutes = require('./routes/auth');
 const posRoutes = require('./routes/pos');
 const crmRoutes = require('./routes/crm');
 const settingsRoutes = require('./routes/settings');
+const socialRoutes = require('./routes/social');
+const integrationRoutes = require('./routes/integration');
 const { authMiddleware } = require('./middleware/auth');
 
 const app = express();
@@ -28,6 +30,8 @@ app.get('/api/health', (req, res) => {
 
 // Public routes
 app.use('/api/auth', authRoutes);
+app.use('/api/social', socialRoutes);
+app.use('/api/integration', integrationRoutes);
 
 // Protected routes
 app.use('/api/pos', authMiddleware, posRoutes);
